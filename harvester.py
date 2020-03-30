@@ -247,7 +247,7 @@ for cellindex, cell in enumerate(grid):
   features_light.append(feature_template.format(cell[1], cell[0], sum(clean[cellindex])))
 
 def finishGeojson (feature_list, file_name):
-  geojson = '{{"type":"FeatureCollection","properties":{{"start":{},"end":{}}}"features":[{}]}}'.format(startdate, enddate, ",".join(feature_list))
+  geojson = '{{"type":"FeatureCollection","properties":{{"start":"{}","end":"{}"}},"features":[{}]}}'.format(startdate, enddate, ",".join(feature_list))
 
   text_file = open(path + file_name, "w")
   n = text_file.write(geojson)
