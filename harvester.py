@@ -43,7 +43,7 @@ from datetime import timedelta
 import urllib.request
 
 enddate = datetime.now() + timedelta(days=-1)
-date = datetime.combine(last_date, datetime.min.time()) + timedelta(days=-1)
+date = datetime.combine(last_date, datetime.min.time()) + timedelta(days=1)
 
 while date <= enddate:
   url = 'https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/recent/asc/RW-{}.tar.gz'.format(date.strftime("%Y%m%d"))
@@ -102,12 +102,16 @@ import subprocess
 from shapely.wkt import dumps
 import geopandas
 
+last_received = datetime.strptime("1970-01-01 01:00:00", '%Y-%m-%d %H:%M:%S')
+
 for counter, file in enumerate(filelist):
   input_file = file
   FNULL = open(os.devnull, 'w')
     
   file_split = file.split("/")
   date_time_obj = datetime.strptime(file_split[len(file_split)-1], 'RW_%Y%m%d-%H%M.asc')
+  if date_time_obj > last_received:
+    last_received = date_time_obj
   consoleOutput("Processing: {} / {}".format(len(filelist), counter+1))
 
   output_file = path + "temp.tif"
@@ -212,7 +216,7 @@ startdate = datetime.now() + timedelta(days=-timelimit)
 startdate = startdate.replace(hour=0, minute=50, second=0, microsecond=0)
 with psycopg2.connect(dsn) as conn:
   with conn.cursor() as cur:
-    cur.execute("UPDATE radolan_harvester SET collection_date = %s, start_date = %s, end_date = %s WHERE id = 1", [datetime.now(), startdate, enddate])
+    cur.execute("UPDATE radolan_harvester SET collection_date = %s, start_date = %s, end_date = %s WHERE id = 1", [last_received, startdate, enddate])
 
 # update the tree data
 consoleOutput("updating trees 🌳")
@@ -260,4 +264,4 @@ shutil.rmtree(path)
 
 # wohooo!
 sys.stdout.write("\033[K")
-print("✅ Radolan data integrated from {} to {}".format(startdate, enddate))
+print("✅ Map updated to timespan: {} to {}".format(startdate, enddate))
