@@ -210,13 +210,14 @@ for cell in grid:
   clean.append(clean_data)
 
 # update statistics db
-enddate = datetime.now() + timedelta(days=-1)
-enddate = enddate.replace(hour=23, minute=50, second=0, microsecond=0)
-startdate = datetime.now() + timedelta(days=-timelimit)
-startdate = startdate.replace(hour=0, minute=50, second=0, microsecond=0)
-with psycopg2.connect(dsn) as conn:
-  with conn.cursor() as cur:
-    cur.execute("UPDATE radolan_harvester SET collection_date = %s, start_date = %s, end_date = %s WHERE id = 1", [last_received, startdate, enddate])
+if len(filelist) > 0:
+  enddate = datetime.now() + timedelta(days=-1)
+  enddate = enddate.replace(hour=23, minute=50, second=0, microsecond=0)
+  startdate = datetime.now() + timedelta(days=-timelimit)
+  startdate = startdate.replace(hour=0, minute=50, second=0, microsecond=0)
+  with psycopg2.connect(dsn) as conn:
+    with conn.cursor() as cur:
+      cur.execute("UPDATE radolan_harvester SET collection_date = %s, start_date = %s, end_date = %s WHERE id = 1", [last_received, startdate, enddate])
 
 # update the tree data
 consoleOutput("updating trees 🌳")
