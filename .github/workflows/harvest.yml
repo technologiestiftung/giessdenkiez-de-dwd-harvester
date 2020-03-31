@@ -14,7 +14,7 @@ env:
   PG_DB: postgres
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  S3_BUCKET: ${{ secrets.S3_BUCKET }}
+  S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
   OUTPUT: True
 
 jobs:
@@ -25,7 +25,7 @@ jobs:
       - name: Get the source
         uses: actions/checkout@v2
       - name: Run postgres db (test)
-        run: docker-compose up -d --build postgres
+        run: docker-compose -f docker-compose.postgres.yml up -d
       - name: Run the Harvester container
         id: harvester
         uses: technologiestiftung/dwd-radolan-tree-harvester@master
