@@ -1,0 +1,12 @@
+name: harvester
+author: "Fabian Morón Zirfas"
+description: "Runs the harvester.py"
+env:
+  - FOO=bah
+runs:
+  using: 'docker'
+  # image: 'docker://debian:stretch-slim'
+  image: './harvester/Dockerfile'
+branding:
+  icon: 'cloud-rain'
+  color: 'blue'

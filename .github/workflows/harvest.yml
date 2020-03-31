@@ -1,0 +1,31 @@
+name: harvester
+
+on:
+  push:
+    branches:
+      - feature/gh-actions
+    paths:
+      - trigger.txt
+env:
+  PG_SERVER: postgres
+  PG_PORT: 5432
+  PG_USER: postgres
+  PG_PASS: postgres_password
+  PG_DB: postgres
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  S3_BUCKET: ${{ secrets.S3_BUCKET }}
+  OUTPUT: True
+
+jobs:
+  harvest:
+    runs-on: ubuntu-18.04
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    steps:
+      - name: Get the source
+        uses: actions/checkout@v2
+      - name: Run postgres db (test)
+        run: docker-compose up -d --build postgres
+      - name: Run the Harvester container
+        id: harvester
+        uses: technologiestiftung/dwd-radolan-tree-harvester@feature/gh-action
