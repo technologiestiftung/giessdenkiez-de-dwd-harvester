@@ -3,7 +3,7 @@ name: harvester
 on:
   push:
     branches:
-      - feature/gh-actions
+      - master
     paths:
       - trigger.txt
 env:
@@ -28,4 +28,4 @@ jobs:
         run: docker-compose up -d --build postgres
       - name: Run the Harvester container
         id: harvester
-        uses: technologiestiftung/dwd-radolan-tree-harvester@feature/gh-action
+        uses: technologiestiftung/dwd-radolan-tree-harvester@master
