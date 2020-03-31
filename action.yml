@@ -5,7 +5,7 @@ env:
   - FOO=bah
 runs:
   using: 'docker'
-  image: 'docker:/technologiestiftung/dwd-radolan-tree-harvester:test'
+  image: 'docker://technologiestiftung/dwd-radolan-tree-harvester:test'
   # image: './harvester/Dockerfile'
 branding:
   icon: 'cloud-rain'
