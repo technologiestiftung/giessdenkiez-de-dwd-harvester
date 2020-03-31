@@ -38,6 +38,5 @@ then
   exit 1
 fi
 
-docker build --tag "${GITHUB_REPOSITORY}-${SUFFIX}:${TAG}-${STAGE}" -f "${DOCKERFILE}" .
-
-# docker push "${GITHUB_REPOSITORY}-${SUFFIX}:${TAG}-${STAGE}"
+docker build --tag "${GITHUB_REPOSITORY}:${TAG}" -f "${DOCKERFILE}" .
+docker push "${GITHUB_REPOSITORY}:${TAG}"
