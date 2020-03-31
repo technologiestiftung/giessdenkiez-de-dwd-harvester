@@ -10,6 +10,25 @@ import os
 import psycopg2
 import psycopg2.extras
 
+if "PG_DB" in os.environ:
+  pass
+if "PG_PORT" in os.environ:
+  pass
+if "PG_USER" in os.environ:
+  pass
+if "PG_PASS" in os.environ:
+  pass
+if "PG_DB" in os.environ:
+  pass
+if "AWS_ACCESS_KEY_ID" in os.environ:
+  pass
+if "AWS_SECRET_ACCESS_KEY" in os.environ:
+  pass
+if "S3_BUCKET" in os.environ:
+  pass
+if "OUTPUT" in os.environ:
+  pass
+
 pg_server = os.getenv("PG_SERVER")
 pg_port = os.getenv("PG_PORT")
 pg_username = os.getenv("PG_USER")
@@ -38,7 +57,7 @@ if os.path.isdir(path) != True:
   os.mkdir(path)
 
 # now download all zips starting from last date, until yesterday (DWD usually uploads the latest data at some point during the night)
-from datetime import datetime  
+from datetime import datetime
 from datetime import timedelta
 import urllib.request
 
@@ -68,7 +87,7 @@ for (dirpath, dirnames, filenames) in os.walk(path):
         with open(full_filename.split(".gz")[0], 'wb') as f_out:
           shutil.copyfileobj(f_in, f_out)
       os.remove(full_filename)
-    
+
       # now untar
       with tarfile.open(full_filename.split(".gz")[0], "r") as tar:
         temp_path = full_filename.split(".tar")[0]
@@ -107,7 +126,7 @@ last_received = datetime.strptime("1970-01-01 01:00:00", '%Y-%m-%d %H:%M:%S')
 for counter, file in enumerate(filelist):
   input_file = file
   FNULL = open(os.devnull, 'w')
-    
+
   file_split = file.split("/")
   date_time_obj = datetime.strptime(file_split[len(file_split)-1], 'RW_%Y%m%d-%H%M.asc')
   if date_time_obj > last_received:
@@ -132,7 +151,7 @@ for counter, file in enumerate(filelist):
   cmdline = ['gdal_polygonize.py', output_file, "-f", "ESRI Shapefile", path + "temp.shp", "temp", "MYFLD"]
   # if you want debugging info, remove the last to params
   subprocess.call(cmdline, stdout=FNULL, stderr=subprocess.STDOUT)
-    
+
   cmdline = None
 
   df = geopandas.read_file(path + "temp.shp")
