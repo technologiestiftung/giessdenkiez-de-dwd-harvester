@@ -238,52 +238,52 @@ if len(filelist) > 0:
     with conn.cursor() as cur:
       cur.execute("UPDATE radolan_harvester SET collection_date = %s, start_date = %s, end_date = %s WHERE id = 1", [last_received, startdate, enddate])
 
-# update the tree data
-consoleOutput("updating trees 🌳")
-values = []
-for cellindex, cell in enumerate(grid):
-  values.append([clean[cellindex], sum(clean[cellindex]), cell[1]])
+  # update the tree data
+  consoleOutput("updating trees 🌳")
+  values = []
+  for cellindex, cell in enumerate(grid):
+    values.append([clean[cellindex], sum(clean[cellindex]), cell[1]])
 
-with psycopg2.connect(dsn) as conn:
-  with conn.cursor() as cur:
-    psycopg2.extras.execute_batch(
-        cur,
-        "UPDATE trees SET radolan_days = %s, radolan_sum = %s WHERE ST_CoveredBy(geom, ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326));",
-        values
-    )
-values = None
+  with psycopg2.connect(dsn) as conn:
+    with conn.cursor() as cur:
+      psycopg2.extras.execute_batch(
+          cur,
+          "UPDATE trees SET radolan_days = %s, radolan_sum = %s WHERE ST_CoveredBy(geom, ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326));",
+          values
+      )
+  values = None
 
-# generate gejson for map and upload to S3
-consoleOutput("generate geojson 🗺️")
+  # generate gejson for map and upload to S3
+  consoleOutput("generate geojson 🗺️")
+  import boto3
+  s3 = boto3.client('s3', aws_access_key_id=os.getenv("ACCESS_KEY"), aws_secret_access_key=os.getenv("SECRET_KEY"))
 
-import boto3
+  features = []
+  features_light = []
 
-s3 = boto3.client('s3', aws_access_key_id=os.getenv("ACCESS_KEY"), aws_secret_access_key=os.getenv("SECRET_KEY"))
+  for cellindex, cell in enumerate(grid):
+    feature_template = '{{"type":"Feature","geometry":{},"properties":{{"id":{},"data":[{}]}}}}'
+    features.append(feature_template.format(cell[1], cell[0], ",".join(map(str, clean[cellindex]))))
+    features_light.append(feature_template.format(cell[1], cell[0], sum(clean[cellindex])))
 
-features = []
-features_light = []
+  def finishGeojson (feature_list, file_name):
+    geojson = '{{"type":"FeatureCollection","properties":{{"start":"{}","end":"{}"}},"features":[{}]}}'.format(startdate, enddate, ",".join(feature_list))
 
-for cellindex, cell in enumerate(grid):
-  feature_template = '{{"type":"Feature","geometry":{},"properties":{{"id":{},"data":[{}]}}}}'
-  features.append(feature_template.format(cell[1], cell[0], ",".join(map(str, clean[cellindex]))))
-  features_light.append(feature_template.format(cell[1], cell[0], sum(clean[cellindex])))
+    text_file = open(path + file_name, "w")
+    n = text_file.write(geojson)
+    text_file.close()
+    n = None
 
-def finishGeojson (feature_list, file_name):
-  geojson = '{{"type":"FeatureCollection","properties":{{"start":"{}","end":"{}"}},"features":[{}]}}'.format(startdate, enddate, ",".join(feature_list))
+    s3.upload_file(path + file_name, os.getenv("S3_BUCKET"), file_name)
 
-  text_file = open(path + file_name, "w")
-  n = text_file.write(geojson)
-  text_file.close()
-  n = None
+  finishGeojson(features, "weather.geojson")
+  finishGeojson(features_light, "weather_light.geojson")
 
-  s3.upload_file(path + file_name, os.getenv("S3_BUCKET"), file_name)
+  # remove all temporary files
+  shutil.rmtree(path)
 
-finishGeojson(features, "weather.geojson")
-finishGeojson(features_light, "weather_light.geojson")
-
-# remove all temporary files
-shutil.rmtree(path)
-
-# wohooo!
-sys.stdout.write("\033[K")
-print("✅ Map updated to timespan: {} to {}".format(startdate, enddate))
+  # wohooo!
+  sys.stdout.write("\033[K")
+  print("✅ Map updated to timespan: {} to {}".format(startdate, enddate))
+else:
+  print("No updates")
