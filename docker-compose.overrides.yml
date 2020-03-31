@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  harvester:
+    image: "technologiestiftung/dwd-radolan-tree-harvester:test"
+    depends_on:
+      - postgres
+    env_file: ./harvester/.env
