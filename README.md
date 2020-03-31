@@ -19,6 +19,16 @@ I had some trouble installing psycopg2 on MacOS, there is a problem with the ssl
 env LDFLAGS='-L/usr/local/lib -L/usr/local/opt/openssl/lib -L/usr/local/opt/readline/lib' pip install psycopg2
 ```
 
+As some of python's gdal bindings are not as good as the command line tool, i had to use the original. Therefore, `gdal` needs to be installed.
+
+Make sure the command line calls for `gdalwarp` and `gdal_polygonize.py` are working.
+
+Here is a good explanation on how to install gdal on linux: https://mothergeo-py.readthedocs.io/en/latest/development/how-to/gdal-ubuntu-pkg.html
+
+For mac we can use `brew install gdal`.
+
+The current python binding of gdal is fixed to GDAL==2.4.2. If you get another gdal (`ogrinfo --version`), make sure to upgrade to your version: `pip install GDAL==VERSION_FROM_PREVIOUS_COMMAND`
+
 Copy the `sample.env` file and rename to `.env` then update the parameters, most importantly the database connection parameters.
 
 ## Running
