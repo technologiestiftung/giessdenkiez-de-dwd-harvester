@@ -1,0 +1,20 @@
+{
+  "workbench.colorCustomizations": {
+    "activityBar.background": "#9ec7e2",
+    "activityBar.activeBackground": "#9ec7e2",
+    "activityBar.activeBorder": "#cc539c",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#cc539c",
+    "activityBarBadge.foreground": "#e7e7e7",
+    "titleBar.activeBackground": "#77b0d6",
+    "titleBar.inactiveBackground": "#77b0d699",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.inactiveForeground": "#15202b99",
+    "statusBar.background": "#77b0d6",
+    "statusBarItem.hoverBackground": "#5099ca",
+    "statusBar.foreground": "#15202b"
+  },
+  "peacock.color": "#77b0d6",
+  "python.pythonPath": "/Users/icke/.pyenv/versions/3.8.2/bin/python3.8"
+}
