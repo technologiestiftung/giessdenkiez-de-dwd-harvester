@@ -1,0 +1,24 @@
+{
+  "tasks": [
+    {
+      "type": "docker-build",
+      "label": "docker-build",
+      "platform": "python",
+      "dockerBuild": {
+        "tag": "dwdradolantreeharvester:latest",
+        "dockerfile": "${workspaceFolder}/harvester/Dockerfile",
+        "context": "${workspaceFolder}"
+      }
+    },
+    {
+      "type": "docker-run",
+      "label": "docker-run: debug",
+      "dependsOn": [
+        "docker-build"
+      ],
+      "python": {
+        "file": "harvester.py"
+      }
+    }
+  ]
+}
