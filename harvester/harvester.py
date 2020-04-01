@@ -52,7 +52,7 @@ with psycopg2.connect(dsn) as conn:
     last_date = cur.fetchone()[0]
 
 # create a temporary folder to store the downloaded DWD data
-path = "./temp/"
+path = "/temp/"
 if os.path.isdir(path) != True:
   os.mkdir(path)
 
@@ -143,7 +143,7 @@ for counter, file in enumerate(filelist):
   # for some reason the python gdal bindings are ****. after hours of trying to get this to work in pure python, this has proven to be more reliable and efficient. sorry.
 
   # filter data
-  cmdline = ['gdalwarp', input_file, output_file, "-s_srs", "+proj=stere +lon_0=10.0 +lat_0=90.0 +lat_ts=60.0 +a=6370040 +b=6370040 +units=m", "-t_srs", "+proj=stere +lon_0=10.0 +lat_0=90.0 +lat_ts=60.0 +a=6370040 +b=6370040 +units=m", "-r", "near", "-of", "GTiff", "-cutline", "./assets/buffer.shp" ]
+  cmdline = ['gdalwarp', input_file, output_file, "-s_srs", "+proj=stere +lon_0=10.0 +lat_0=90.0 +lat_ts=60.0 +a=6370040 +b=6370040 +units=m", "-t_srs", "+proj=stere +lon_0=10.0 +lat_0=90.0 +lat_ts=60.0 +a=6370040 +b=6370040 +units=m", "-r", "near", "-of", "GTiff", "-cutline", "/app/assets/buffer.shp" ]
   # if you want debugging info, remove the last to params
   subprocess.call(cmdline, stdout=FNULL, stderr=subprocess.STDOUT)
 
