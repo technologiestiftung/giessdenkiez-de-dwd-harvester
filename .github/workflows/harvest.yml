@@ -28,9 +28,9 @@ jobs:
     runs-on: ubuntu-18.04
     if: "!contains(github.event.head_commit.message, 'ci skip')"
     steps:
-      - name: Get the source
-        uses: actions/checkout@v2
-      - name: Run postgres db (test)
-        run: docker-compose -f docker-compose.postgres.yml up -d
+      # - name: Get the source
+        # uses: actions/checkout@v2
+      # - name: Run postgres db (test)
+        # run: docker-compose -f docker-compose.postgres.yml up -d
       - name: Run the Harvester container
         run: docker run -e PG_SERVER -e PG_PORT -e PG_USER -e PG_PASS -e PG_DB -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e S3_BUCKET -e OUTPUT technologiestiftung/dwd-radolan-tree-harvester:test
