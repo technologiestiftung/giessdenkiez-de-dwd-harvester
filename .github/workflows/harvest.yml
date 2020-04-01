@@ -33,4 +33,4 @@ jobs:
       # - name: Run postgres db (test)
         # run: docker-compose -f docker-compose.postgres.yml up -d
       - name: Run the Harvester container
-        run: docker run -e PG_SERVER -e PG_PORT -e PG_USER -e PG_PASS -e PG_DB -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e S3_BUCKET -e OUTPUT v -p 5432:5432 technologiestiftung/dwd-radolan-tree-harvester:test
+        run: docker run -e PG_SERVER -e PG_PORT -e PG_USER -e PG_PASS -e PG_DB -e AWS_ACCESS_KEY_ID -e AWS_SECRET_ACCESS_KEY -e S3_BUCKET -e OUTPUT -p 5432:5432 technologiestiftung/dwd-radolan-tree-harvester:test
