@@ -24,7 +24,8 @@ RUN python -m pip install --no-warn-script-location --prefix=/install -r require
 FROM base as app
 COPY --from=builder /install /usr/local
 WORKDIR /app
-COPY harvester.py assets /app/
+COPY harvester.py /app/
+COPY assets/ /app/assets
 # COPY . /app
 
 # During debugging, this entry point will be overridden. For more information, refer to https://aka.ms/vscode-docker-python-debug
