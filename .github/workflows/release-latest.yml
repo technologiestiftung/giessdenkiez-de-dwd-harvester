@@ -1,0 +1,31 @@
+name: Docker Image Builder
+
+env:
+  DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
+  DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
+  HARVESTER_FOLDER: harvester/
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - harvester/*.py
+      - harvester/Dockerfile
+      - harvester/assets/**/*
+      - harvester/requirements.txt
+
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    steps:
+      - name: Get the source
+        uses: actions/checkout@v2
+      - name: Docker login, build and push
+        run:  |
+          cd $HARVESTER_FOLDER
+          echo "$DOCKER_PASSWORD" |  docker login -u "$DOCKER_USERNAME" --password-stdin
+          docker build --tag "${GITHUB_REPOSITORY}:latest" .
+          docker push "${GITHUB_REPOSITORY}:latest"
