@@ -47,7 +47,7 @@ last_date = None
 try:
   conn = psycopg2.connect(dsn)
   logging.info("🗄 Database connection established")
-except OperationalError as err:
+except:
   logging.error("❌Could not establish database connection")
   conn = None
 
@@ -68,7 +68,7 @@ from datetime import timedelta
 import urllib.request
 
 enddate = datetime.now() + timedelta(days=-1)
-date = datetime.combine(last_date, datetime.min.time()) + timedelta(days=1)
+date = datetime.combine(last_date, datetime.min.time())
 
 while date <= enddate:
   url = 'https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/recent/asc/RW-{}.tar.gz'.format(date.strftime("%Y%m%d"))
@@ -78,7 +78,7 @@ while date <= enddate:
 
   try:
     urllib.request.urlretrieve(url, dest)
-  except OperationalError as err:
+  except:
     logging.warning("❌Could not download {}".format(url))
 
   date += timedelta(days=1)
