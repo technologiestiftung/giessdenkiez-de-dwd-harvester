@@ -39,7 +39,7 @@ pg_database = os.getenv("PG_DB")
 
 dsn = f"host='{pg_server}' port={pg_port} user='{pg_username}' password='{pg_password}' dbname='{pg_database}'"
 
-logging.info("🆙 Starting harvester")
+logging.info("🆙 Starting harvester v0.5")
 
 # get last day of insert
 last_date = None
@@ -158,11 +158,11 @@ for counter, file in enumerate(filelist):
 
   # filter data
   cmdline = ['gdalwarp', input_file, output_file, "-s_srs", "+proj=stere +lon_0=10.0 +lat_0=90.0 +lat_ts=60.0 +a=6370040 +b=6370040 +units=m", "-t_srs", "+proj=stere +lon_0=10.0 +lat_0=90.0 +lat_ts=60.0 +a=6370040 +b=6370040 +units=m", "-r", "near", "-of", "GTiff", "-cutline", "/app/assets/buffer.shp" ]
-  subprocess.call(cmdline, stdout=cmd_stdout, stderr=subprocess.STDOUT)
+  subprocess.call(cmdline) #, stdout=cmd_stdout, stderr=subprocess.STDOUT)
 
   # polygonize data
   cmdline = ['gdal_polygonize.py', output_file, "-f", "ESRI Shapefile", path + "temp.shp", "temp", "MYFLD"]
-  subprocess.call(cmdline, stdout=cmd_stdout, stderr=subprocess.STDOUT)
+  subprocess.call(cmdline) #, stdout=cmd_stdout, stderr=subprocess.STDOUT)
 
   cmdline = None
 
