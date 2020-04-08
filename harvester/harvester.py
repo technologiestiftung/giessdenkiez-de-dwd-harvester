@@ -136,7 +136,6 @@ last_received = datetime.strptime("1970-01-01 01:00:00", '%Y-%m-%d %H:%M:%S')
 
 for counter, file in enumerate(filelist):
   input_file = file
-  FNULL = open(os.devnull, 'w')
 
   file_split = file.split("/")
   date_time_obj = datetime.strptime(file_split[len(file_split)-1], 'RW_%Y%m%d-%H%M.asc')
@@ -152,17 +151,14 @@ for counter, file in enumerate(filelist):
       os.remove(del_file)
 
   # for some reason the python gdal bindings are ****. after hours of trying to get this to work in pure python, this has proven to be more reliable and efficient. sorry.
-  cmd_stdout = FNULL
-  if LOGGING_MODE == "DEBUG" or LOGGING_MODE == None:
-    cmd_stdout = subprocess.STDOUT
 
   # filter data
   cmdline = ['gdalwarp', input_file, output_file, "-s_srs", "+proj=stere +lon_0=10.0 +lat_0=90.0 +lat_ts=60.0 +a=6370040 +b=6370040 +units=m", "-t_srs", "+proj=stere +lon_0=10.0 +lat_0=90.0 +lat_ts=60.0 +a=6370040 +b=6370040 +units=m", "-r", "near", "-of", "GTiff", "-cutline", "/app/assets/buffer.shp" ]
-  subprocess.call(cmdline) #, stdout=cmd_stdout, stderr=subprocess.STDOUT)
+  subprocess.call(cmdline)
 
   # polygonize data
   cmdline = ['gdal_polygonize.py', output_file, "-f", "ESRI Shapefile", path + "temp.shp", "temp", "MYFLD"]
-  subprocess.call(cmdline) #, stdout=cmd_stdout, stderr=subprocess.STDOUT)
+  subprocess.call(cmdline)
 
   cmdline = None
 
