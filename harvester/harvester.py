@@ -1,33 +1,35 @@
+import logging
+import os
+import sys
+
+# setting up logging
+logging.basicConfig()
+LOGGING_MODE = None
+if "LOGGING" in os.environ:
+  LOGGING_MODE = os.getenv("LOGGING")
+  if LOGGING_MODE == "ERROR":
+    logging.root.setLevel(logging.ERROR)
+  elif LOGGING_MODE == "WARNING":
+    logging.root.setLevel(logging.WARNING)
+  elif LOGGING_MODE == "INFO":
+    logging.root.setLevel(logging.INFO)
+  else:
+    logging.root.setLevel(logging.NOTSET)
+else:
+  logging.root.setLevel(logging.NOTSET)
+
 # loading the environmental variables
 from dotenv import load_dotenv
 load_dotenv()
 
-# make environmental variables accessible
-import os
-# SECRET_KEY = os.getenv("EMAIL")
+# check if all required environmental variables are accessible
+for env_var in ["PG_DB", "PG_PORT", "PG_USER", "PG_PASS", "PG_DB", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "S3_BUCKET"]:
+  if env_var not in os.environ:
+    logging.error("❌Environmental Variable {} does not exist".format(env_var))
 
 # database connection
 import psycopg2
 import psycopg2.extras
-
-if "PG_DB" in os.environ:
-  pass
-if "PG_PORT" in os.environ:
-  pass
-if "PG_USER" in os.environ:
-  pass
-if "PG_PASS" in os.environ:
-  pass
-if "PG_DB" in os.environ:
-  pass
-if "AWS_ACCESS_KEY_ID" in os.environ:
-  pass
-if "AWS_SECRET_ACCESS_KEY" in os.environ:
-  pass
-if "S3_BUCKET" in os.environ:
-  pass
-if "OUTPUT" in os.environ:
-  pass
 
 pg_server = os.getenv("PG_SERVER")
 pg_port = os.getenv("PG_PORT")
@@ -37,19 +39,23 @@ pg_database = os.getenv("PG_DB")
 
 dsn = f"host='{pg_server}' port={pg_port} user='{pg_username}' password='{pg_password}' dbname='{pg_database}'"
 
-# nice console output / turn console output off in .env
-import sys
-def consoleOutput (str):
-  if os.getenv("OUTPUT") == True or os.getenv("OUTPUT") == "True" :
-    sys.stdout.write("\033[K")
-    print(str, end="\r")
+logging.info("🆙 Starting harvester v0.5")
 
 # get last day of insert
 last_date = None
-with psycopg2.connect(dsn) as conn:
-  with conn.cursor() as cur:
-    cur.execute("SELECT collection_date FROM radolan_harvester WHERE id = 1")
-    last_date = cur.fetchone()[0]
+
+try:
+  conn = psycopg2.connect(dsn)
+  logging.info("🗄 Database connection established")
+except:
+  logging.error("❌Could not establish database connection")
+  conn = None
+
+with conn.cursor() as cur:
+  cur.execute("SELECT collection_date FROM radolan_harvester WHERE id = 1")
+  last_date = cur.fetchone()[0]
+
+logging.info("Last harvest {}".format(last_date))
 
 # create a temporary folder to store the downloaded DWD data
 path = "/temp/"
@@ -62,16 +68,21 @@ from datetime import timedelta
 import urllib.request
 
 enddate = datetime.now() + timedelta(days=-1)
-date = datetime.combine(last_date, datetime.min.time()) + timedelta(days=1)
+date = datetime.combine(last_date, datetime.min.time())
 
 while date <= enddate:
   url = 'https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/recent/asc/RW-{}.tar.gz'.format(date.strftime("%Y%m%d"))
   url_split = url.split("/")
   dest_name = url_split[len(url_split) - 1]
   dest = path + dest_name
-  urllib.request.urlretrieve(url, dest)
+
+  try:
+    urllib.request.urlretrieve(url, dest)
+  except:
+    logging.warning("❌Could not download {}".format(url))
+
   date += timedelta(days=1)
-  consoleOutput("Downloading: {} / {}".format(enddate, date))
+  logging.info("Downloading: {} / {}".format(enddate, date))
 
 # unpack the data and delete the zips afterwards
 import tarfile
@@ -100,7 +111,7 @@ for (dirpath, dirnames, filenames) in os.walk(path):
         tar.close()
 
       os.remove(full_filename.split(".gz")[0])
-      consoleOutput("Unzipping: {} / {}".format(len(filenames), fileindex+1))
+      logging.info("Unzipping: {} / {}".format(len(filenames), fileindex+1))
 
 # collecting all the files that need importing in one list
 filelist = []
@@ -125,13 +136,12 @@ last_received = datetime.strptime("1970-01-01 01:00:00", '%Y-%m-%d %H:%M:%S')
 
 for counter, file in enumerate(filelist):
   input_file = file
-  FNULL = open(os.devnull, 'w')
 
   file_split = file.split("/")
   date_time_obj = datetime.strptime(file_split[len(file_split)-1], 'RW_%Y%m%d-%H%M.asc')
   if date_time_obj > last_received:
     last_received = date_time_obj
-  consoleOutput("Processing: {} / {}".format(len(filelist), counter+1))
+  logging.info("Processing: {} / {}".format(len(filelist), counter+1))
 
   output_file = path + "temp.tif"
 
@@ -144,13 +154,11 @@ for counter, file in enumerate(filelist):
 
   # filter data
   cmdline = ['gdalwarp', input_file, output_file, "-s_srs", "+proj=stere +lon_0=10.0 +lat_0=90.0 +lat_ts=60.0 +a=6370040 +b=6370040 +units=m", "-t_srs", "+proj=stere +lon_0=10.0 +lat_0=90.0 +lat_ts=60.0 +a=6370040 +b=6370040 +units=m", "-r", "near", "-of", "GTiff", "-cutline", "/app/assets/buffer.shp" ]
-  # if you want debugging info, remove the last to params
-  subprocess.call(cmdline, stdout=FNULL, stderr=subprocess.STDOUT)
+  subprocess.call(cmdline)
 
   # polygonize data
   cmdline = ['gdal_polygonize.py', output_file, "-f", "ESRI Shapefile", path + "temp.shp", "temp", "MYFLD"]
-  # if you want debugging info, remove the last to params
-  subprocess.call(cmdline, stdout=FNULL, stderr=subprocess.STDOUT)
+  subprocess.call(cmdline)
 
   cmdline = None
 
@@ -161,21 +169,22 @@ for counter, file in enumerate(filelist):
   if df['geometry'].count() > 0:
     clean = df[(df['MYFLD'] > 0) & (df['MYFLD'].notnull())]
     if len(clean) > 0:
+      logging.info("🌧 Found some rain")
       values = []
       for index, row in clean.iterrows():
         values.append([dumps(row.geometry, rounding_precision=5), row.MYFLD, date_time_obj])
-      with psycopg2.connect(dsn) as conn:
-        with conn.cursor() as cur:
-          # just to be sure
-          cur.execute("DELETE FROM radolan_temp;")
-          psycopg2.extras.execute_batch(
-              cur,
-              "INSERT INTO radolan_temp (geometry, value, measured_at) VALUES (ST_Multi(ST_Transform(ST_GeomFromText(%s, 3857), 4326)), %s, %s);",
-              values
-          )
-          # in order to keep our database fast and small, we are not storing the original polygonized data, but instead we are using a grid and only store the grid ids and the corresponding precipitation data
-          cur.execute("INSERT INTO radolan_data (geom_id, value, measured_at) SELECT radolan_geometry.id, radolan_temp.value, radolan_temp.measured_at FROM radolan_geometry JOIN radolan_temp ON ST_WithIn(radolan_geometry.centroid, radolan_temp.geometry);")
-          cur.execute("DELETE FROM radolan_temp;")
+      with conn.cursor() as cur:
+        # just to be sure
+        cur.execute("DELETE FROM radolan_temp;")
+        psycopg2.extras.execute_batch(
+            cur,
+            "INSERT INTO radolan_temp (geometry, value, measured_at) VALUES (ST_Multi(ST_Transform(ST_GeomFromText(%s, 3857), 4326)), %s, %s);",
+            values
+        )
+        # in order to keep our database fast and small, we are not storing the original polygonized data, but instead we are using a grid and only store the grid ids and the corresponding precipitation data
+        cur.execute("INSERT INTO radolan_data (geom_id, value, measured_at) SELECT radolan_geometry.id, radolan_temp.value, radolan_temp.measured_at FROM radolan_geometry JOIN radolan_temp ON ST_WithIn(radolan_geometry.centroid, radolan_temp.geometry);")
+        cur.execute("DELETE FROM radolan_temp;")
+        conn.commit()
   # memory management, just to be sure
       values = None
     clean = None
@@ -186,27 +195,28 @@ for counter, file in enumerate(filelist):
   FNULL = None
 
 # purge data older than 30 days
-consoleOutput("cleaning up old data 🗑️")
+logging.info("cleaning up old data 🗑️")
 timelimit = 30
-with psycopg2.connect(dsn) as conn:
-  with conn.cursor() as cur:
-    cur.execute("DELETE FROM radolan_data WHERE measured_at < NOW() - INTERVAL '{} days'".format(timelimit))
+with conn.cursor() as cur:
+  cur.execute("DELETE FROM radolan_data WHERE measured_at < NOW() - INTERVAL '{} days'".format(timelimit))
+  conn.commit()
+
 
 # purge duplicates
-with psycopg2.connect(dsn) as conn:
-  with conn.cursor() as cur:
-    cur.execute("DELETE FROM radolan_data AS a USING radolan_data AS b WHERE a.id < b.id AND a.geom_id = b.geom_id AND a.measured_at = b.measured_at")
+logging.info("purging duplicates 🗑️")
+with conn.cursor() as cur:
+  cur.execute("DELETE FROM radolan_data AS a USING radolan_data AS b WHERE a.id < b.id AND a.geom_id = b.geom_id AND a.measured_at = b.measured_at")
+  conn.commit()
 
 # get all grid cells, get data for last 30 days for each grid cell, generate a list for each grid cell
 # as we don't store "0" events, those need to be generated, afterwards trees are updated and a geojson is being created
 
 # get the grid and weather data
-consoleOutput("building grid 🌐")
+logging.info("building grid 🌐")
 grid = []
-with psycopg2.connect(dsn) as conn:
-  with conn.cursor() as cur:
-    cur.execute("SELECT radolan_geometry.id, ST_AsGeoJSON(radolan_geometry.geometry), ARRAY_AGG(radolan_data.measured_at) AS measured_at, ARRAY_AGG(radolan_data.value) AS value FROM radolan_geometry JOIN radolan_data ON radolan_geometry.id = radolan_data.geom_id WHERE radolan_data.measured_at > NOW() - INTERVAL '{} days' GROUP BY radolan_geometry.id, radolan_geometry.geometry".format(timelimit))
-    grid = cur.fetchall()
+with conn.cursor() as cur:
+  cur.execute("SELECT radolan_geometry.id, ST_AsGeoJSON(radolan_geometry.geometry), ARRAY_AGG(radolan_data.measured_at) AS measured_at, ARRAY_AGG(radolan_data.value) AS value FROM radolan_geometry JOIN radolan_data ON radolan_geometry.id = radolan_data.geom_id WHERE radolan_data.measured_at > NOW() - INTERVAL '{} days' GROUP BY radolan_geometry.id, radolan_geometry.geometry".format(timelimit))
+  grid = cur.fetchall()
 
 # build clean, sorted arrays
 clean = []
@@ -234,27 +244,28 @@ if len(filelist) > 0:
   enddate = enddate.replace(hour=23, minute=50, second=0, microsecond=0)
   startdate = datetime.now() + timedelta(days=-timelimit)
   startdate = startdate.replace(hour=0, minute=50, second=0, microsecond=0)
-  with psycopg2.connect(dsn) as conn:
-    with conn.cursor() as cur:
-      cur.execute("UPDATE radolan_harvester SET collection_date = %s, start_date = %s, end_date = %s WHERE id = 1", [last_received, startdate, enddate])
+  with conn.cursor() as cur:
+    cur.execute("UPDATE radolan_harvester SET collection_date = %s, start_date = %s, end_date = %s WHERE id = 1", [last_received, startdate, enddate])
+    conn.commit()
 
   # update the tree data
-  consoleOutput("updating trees 🌳")
+  logging.info("updating trees 🌳")
   values = []
   for cellindex, cell in enumerate(grid):
     values.append([clean[cellindex], sum(clean[cellindex]), cell[1]])
 
-  with psycopg2.connect(dsn) as conn:
-    with conn.cursor() as cur:
-      psycopg2.extras.execute_batch(
-          cur,
-          "UPDATE trees SET radolan_days = %s, radolan_sum = %s WHERE ST_CoveredBy(geom, ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326));",
-          values
-      )
+  with conn.cursor() as cur:
+    psycopg2.extras.execute_batch(
+        cur,
+        "UPDATE trees SET radolan_days = %s, radolan_sum = %s WHERE ST_CoveredBy(geom, ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326));",
+        values
+    )
+    conn.commit()
+  
   values = None
 
   # generate gejson for map and upload to S3
-  consoleOutput("generate geojson 🗺️")
+  logging.info("generate geojson 🗺️")
   import boto3
   s3 = boto3.client('s3', aws_access_key_id=os.getenv("ACCESS_KEY"), aws_secret_access_key=os.getenv("SECRET_KEY"))
 
@@ -283,7 +294,8 @@ if len(filelist) > 0:
   shutil.rmtree(path)
 
   # wohooo!
-  sys.stdout.write("\033[K")
-  print("✅ Map updated to timespan: {} to {}".format(startdate, enddate))
+  logging.info("✅ Map updated to timespan: {} to {}".format(startdate, enddate))
 else:
-  print("No updates")
+  logging.info("No updates")
+
+conn.close()

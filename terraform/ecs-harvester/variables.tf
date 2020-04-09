@@ -85,4 +85,6 @@ variable "s3_bucket" {
 variable "output" {
   description = "an env variable for the container"
 }
-
+variable "logging" {
+  description = "an env variable for the container"
+}

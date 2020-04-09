@@ -68,6 +68,10 @@ resource "aws_ecs_task_definition" "task" {
       {
         "name":"OUTPUT",
         "value":"${var.output}"
+        },
+      {
+        "name":"LOGGING",
+        "value":"${var.logging}"
         }
     ],
     "name": "${var.prefix}-${var.name}-${var.env}",
