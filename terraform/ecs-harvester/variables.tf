@@ -48,7 +48,7 @@ variable "image" {
 variable "schedule_expression" {
   description = "The schedule to run in. Could also be cron(*/5 * * * *) see https://docs.aws.amazon.com/AmazonCloudWatch/latest/events/ScheduledEvents.html"
   # every day at UTC 04:00 (container time currently +2 hours for berlin)
-  default = "cron(0 4 * * ? *)"
+  default = "cron(30 5 * * ? *)"
   # every three minutes
   # default = "cron(*/3 * * * ? *)"
 }

@@ -8,6 +8,15 @@ resource "random_id" "rand" {
   byte_length = 4
 }
 
+resource "aws_cloudwatch_log_group" "harvester" {
+  name = "${var.prefix}-${var.name}-${var.env}"
+  retention_in_days = 7
+  tags = {
+    name    = "${var.prefix}-${var.name}-${var.env}"
+    project = "internet-of-trees-harvester"
+  }
+}
+
 resource "aws_cloudwatch_event_target" "cw-target" {
   count     = var.az_count
   rule      = aws_cloudwatch_event_rule.cw_rule.name
