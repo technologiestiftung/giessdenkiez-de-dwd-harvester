@@ -1,10 +1,4 @@
-resource "aws_cloudwatch_log_group" "harvester" {
-  name = "${var.prefix}-${var.name}-${var.env}"
-  tags = {
-    name    = "${var.prefix}-${var.name}-${var.env}"
-    project = "internet-of-trees-harvester"
-  }
-}
+
 
 
 resource "aws_ecs_task_definition" "task" {
@@ -68,6 +62,10 @@ resource "aws_ecs_task_definition" "task" {
       {
         "name":"OUTPUT",
         "value":"${var.output}"
+        },
+      {
+        "name":"LOGGING",
+        "value":"${var.logging}"
         }
     ],
     "name": "${var.prefix}-${var.name}-${var.env}",
