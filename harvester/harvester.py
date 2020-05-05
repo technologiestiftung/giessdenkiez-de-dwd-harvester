@@ -303,7 +303,7 @@ if len(filelist) > 0:
     geojson_bindata = bytearray(geojson_data)
     with gzip.open(path + file_name + ".gz", "wb") as f:
 	    f.write(geojson_bindata)
-    s3.upload_file(path + file_name + ".gz", os.getenv("S3_BUCKET"), file_name + ".gz", ExtraArgs={'Metadata': {'Content-Type': 'application/json', 'Content-Encoding': 'gzip'}})
+    s3.upload_file(path + file_name + ".gz", os.getenv("S3_BUCKET"), file_name + ".gz", ExtraArgs={'ContentType': 'application/json', 'ContentEncoding': 'gzip'})
 
   finishGeojson(features, "weather.geojson")
   finishGeojson(features_light, "weather_light.geojson")
@@ -328,7 +328,7 @@ if len(filelist) > 0:
     with gzip.open(path + "trees.csv.gz", "wb") as f:
 	    f.write(csv_data)
     
-    s3.upload_file(path + "trees.csv.gz", os.getenv("S3_BUCKET"), "trees.csv.gz", ExtraArgs={'Metadata': {'Content-Type': 'text/csv', 'Content-Encoding': 'gzip'}})
+    s3.upload_file(path + "trees.csv.gz", os.getenv("S3_BUCKET"), "trees.csv.gz", ExtraArgs={'ContentType': 'text/csv', 'ContentEncoding': 'gzip'})
 
     trees_csv = None
     csv_data = None
