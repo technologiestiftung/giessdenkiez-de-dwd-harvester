@@ -261,7 +261,17 @@ if len(filelist) > 0:
         values
     )
     conn.commit()
-  
+
+  # update all the trees we have missed with the first round :(
+  logging.info("updating sad trees 🌳")
+  with conn.cursor() as cur:
+    psycopg2.extras.execute_batch(
+        cur,
+        "UPDATE trees SET radolan_days = %s, radolan_sum = %s WHERE trees.radolan_sum IS NULL AND ST_CoveredBy(geom, ST_Buffer(ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326), 0.00005));",
+        values
+    )
+    conn.commit()
+
   values = None
 
   # generate gejson for map and upload to S3
@@ -287,8 +297,41 @@ if len(filelist) > 0:
 
     s3.upload_file(path + file_name, os.getenv("S3_BUCKET"), file_name)
 
+    # add an additional gzip version
+    geojson_file = open(path + file_name,"rb")
+    geojson_data = geojson_file.read()
+    geojson_bindata = bytearray(geojson_data)
+    with gzip.open(path + file_name + ".gz", "wb") as f:
+	    f.write(geojson_bindata)
+    s3.upload_file(path + file_name + ".gz", os.getenv("S3_BUCKET"), file_name + ".gz", ExtraArgs={'Metadata': {'Content-Type': 'application/json', 'Content-Encoding': 'gzip'}})
+
   finishGeojson(features, "weather.geojson")
   finishGeojson(features_light, "weather_light.geojson")
+
+  # create a CSV with all trees (id, lat, lng, radolan_sum)
+  with conn.cursor() as cur:
+    cur.execute("SELECT trees.id, trees.lat, trees.lng, trees.radolan_sum FROM trees WHERE ST_CONTAINS(ST_SetSRID((SELECT ST_EXTENT(geometry) FROM radolan_geometry), 4326), trees.geom)")
+    trees = cur.fetchall()
+    trees_csv = "id,lat,lng,radolan_sum"
+    for tree in trees:
+      trees_csv += "\n"
+      trees_csv += "{},{},{},{}".format(tree[0], tree[1], tree[2], tree[3])
+    
+    text_file = open(path + "trees.csv", "w")
+    n = text_file.write(trees_csv)
+    text_file.close()
+    n = None
+
+    s3.upload_file(path + "trees.csv", os.getenv("S3_BUCKET"), "trees.csv")
+
+    csv_data = bytes(trees_csv, "utf-8")
+    with gzip.open(path + "trees.csv.gz", "wb") as f:
+	    f.write(csv_data)
+    
+    s3.upload_file(path + "trees.csv.gz", os.getenv("S3_BUCKET"), "trees.csv.gz", ExtraArgs={'Metadata': {'Content-Type': 'text/csv', 'Content-Encoding': 'gzip'}})
+
+    trees_csv = None
+    csv_data = None
 
   # remove all temporary files
   shutil.rmtree(path)
