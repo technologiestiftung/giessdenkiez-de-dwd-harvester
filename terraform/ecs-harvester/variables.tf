@@ -41,7 +41,7 @@ variable "subnets" {
 }
 variable "image" {
   description = "the image to use for your task"
-  default     = "technologiestiftung/dwd-radolan-tree-harvester:test"
+  default     = "technologiestiftung/dwd-radolan-tree-harvester:latest"
 }
 
 
