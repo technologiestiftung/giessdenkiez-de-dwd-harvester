@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import math
 
 # setting up logging
 logging.basicConfig()
@@ -310,25 +311,56 @@ if len(filelist) > 0:
 
   # create a CSV with all trees (id, lat, lng, radolan_sum)
   with conn.cursor() as cur:
-    cur.execute("SELECT trees.id, trees.lat, trees.lng, trees.radolan_sum FROM trees WHERE ST_CONTAINS(ST_SetSRID((SELECT ST_EXTENT(geometry) FROM radolan_geometry), 4326), trees.geom)")
+    cur.execute("SELECT trees.id, trees.lat, trees.lng, trees.radolan_sum, CASE WHEN LENGTH(trees.pflanzjahr) = 4 THEN date_part('year', CURRENT_DATE) - To_Number(trees.pflanzjahr, '9999') ELSE NULL END AS age FROM trees WHERE ST_CONTAINS(ST_SetSRID((SELECT ST_EXTENT(geometry) FROM radolan_geometry), 4326), trees.geom)")
     trees = cur.fetchall()
-    trees_csv = "id,lat,lng,radolan_sum"
+    trees_head = "id,lat,lng,radolan_sum,age"
+    trees_csv = trees_head
+    pLimit = math.ceil(len(trees) / 4)
+    pCount = 0
+    pfCount = 1
+    singleCSV = trees_head
+    singleCSVs = []
     for tree in trees:
-      trees_csv += "\n"
-      trees_csv += "{},{},{},{}".format(tree[0], tree[1], tree[2], tree[3])
-    
+      newLine = "\n"
+      newLine += "{},{},{},{}".format(tree[0], tree[1], tree[2], tree[3])
+      if tree[4] is not None:
+        newLine += ",{}".format(int(tree[4]))
+      singleCSV += newLine      
+      trees_csv += newLine
+      pCount += 1
+      if pCount >= pLimit:
+        text_file = open(path + "trees-p{}.csv".format(pfCount), "w")
+        singleCSVs.append(singleCSV)
+        n = text_file.write(singleCSV)
+        text_file.close()
+        n = None
+        pfCount += 1
+        pCount = 0
+        singleCSV = trees_head
+
+    text_file = open(path + "trees-p{}.csv".format(pfCount), "w")
+    singleCSVs.append(singleCSV)
+    n = text_file.write(singleCSV)
+    text_file.close()
+    n = None
+
     text_file = open(path + "trees.csv", "w")
     n = text_file.write(trees_csv)
     text_file.close()
     n = None
 
     s3.upload_file(path + "trees.csv", os.getenv("S3_BUCKET"), "trees.csv")
-
     csv_data = bytes(trees_csv, "utf-8")
     with gzip.open(path + "trees.csv.gz", "wb") as f:
 	    f.write(csv_data)
-    
     s3.upload_file(path + "trees.csv.gz", os.getenv("S3_BUCKET"), "trees.csv.gz", ExtraArgs={'ContentType': 'text/csv', 'ContentEncoding': 'gzip'})
+
+    for i in range(4):
+      s3.upload_file(path + "trees-p{}.csv".format(i + 1), os.getenv("S3_BUCKET"), "trees-p{}.csv".format(i + 1))
+      csv_data = bytes(singleCSVs[i], "utf-8")
+      with gzip.open(path + "trees-p{}.csv.gz".format(i + 1), "wb") as f:
+        f.write(csv_data)
+      s3.upload_file(path + "trees-p{}.csv.gz".format(i + 1), os.getenv("S3_BUCKET"), "trees-p{}.csv.gz".format(i + 1), ExtraArgs={'ContentType': 'text/csv', 'ContentEncoding': 'gzip'})
 
     trees_csv = None
     csv_data = None
