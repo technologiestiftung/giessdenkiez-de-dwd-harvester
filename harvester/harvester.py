@@ -313,7 +313,7 @@ if len(filelist) > 0:
   with conn.cursor() as cur:
     cur.execute("SELECT trees.id, trees.lat, trees.lng, trees.radolan_sum, CASE WHEN LENGTH(trees.pflanzjahr) = 4 THEN date_part('year', CURRENT_DATE) - To_Number(trees.pflanzjahr, '9999') ELSE NULL END AS age FROM trees WHERE ST_CONTAINS(ST_SetSRID((SELECT ST_EXTENT(geometry) FROM radolan_geometry), 4326), trees.geom)")
     trees = cur.fetchall()
-    trees_head = "id,lat,lng,radolan_sum,age"
+    trees_head = "id,lng,lat,radolan_sum,age"
     trees_csv = trees_head
     pLimit = math.ceil(len(trees) / 4)
     pCount = 0
@@ -361,6 +361,30 @@ if len(filelist) > 0:
       with gzip.open(path + "trees-p{}.csv.gz".format(i + 1), "wb") as f:
         f.write(csv_data)
       s3.upload_file(path + "trees-p{}.csv.gz".format(i + 1), os.getenv("S3_BUCKET"), "trees-p{}.csv.gz".format(i + 1), ExtraArgs={'ContentType': 'text/csv', 'ContentEncoding': 'gzip'})
+
+    # send the updated csv to mapbox
+
+    import requests
+    import json
+    import csv
+
+    # get upload credentials
+
+    url = "https://api.mapbox.com/uploads/v1/{}/credentials?access_token={}".format(os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTOKEN"))
+    response = requests.post(url)
+    s3_credentials = json.loads(response.content)
+
+    # upload latest data
+
+    s3mapbox = boto3.client('s3', aws_access_key_id=s3_credentials["accessKeyId"], aws_secret_access_key=s3_credentials["secretAccessKey"], aws_session_token=s3_credentials["sessionToken"])
+    s3mapbox.upload_file("trees.csv", s3_credentials["bucket"], s3_credentials["key"])
+
+    # tell mapbox that new data has arrived
+
+    url = "https://api.mapbox.com/uploads/v1/{}?access_token={}".format(os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTOKEN"))
+    payload = '{{"url":"http://{}.s3.amazonaws.com/{}","tileset":"{}.{}"}}'.format(s3_credentials["bucket"], s3_credentials["key"], os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTILESET"))
+    headers = {'content-type': 'application/json', 'Accept-Charset': 'UTF-8', 'Cache-Control': 'no-cache'}
+    response = requests.post(url, data=payload, headers=headers)
 
     trees_csv = None
     csv_data = None
