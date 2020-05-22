@@ -367,7 +367,6 @@ if len(filelist) > 0:
 
     import requests
     import json
-    import csv
 
     # get upload credentials
 
