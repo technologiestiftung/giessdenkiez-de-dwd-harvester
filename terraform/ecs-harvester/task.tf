@@ -66,7 +66,20 @@ resource "aws_ecs_task_definition" "task" {
       {
         "name":"LOGGING",
         "value":"${var.logging}"
+        },
+        {
+          name:"MAPBOXUSERNAME",
+        "value":"${var.mapboxusername}"
+        },
+        {
+          name:"MAPBOXTILESET",
+        "value":"${var.mapboxtileset}"
+        },
+        {
+          name:"MAPBOXTOKEN",
+        "value":"${var.mapboxtoken}"
         }
+
     ],
     "name": "${var.prefix}-${var.name}-${var.env}",
     "image": "${var.image}",

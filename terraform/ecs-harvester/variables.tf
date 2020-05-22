@@ -88,3 +88,14 @@ variable "output" {
 variable "logging" {
   description = "an env variable for the container"
 }
+variable "mapboxusername" {
+  description = "an env variable for the container"
+}
+variable "mapboxtileset" {
+  description = "an env variable for the container"
+}
+variable "mapboxtoken" {
+  description = "an env variable for the container"
+}
+
+
