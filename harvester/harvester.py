@@ -375,7 +375,7 @@ if len(filelist) > 0:
     s3_credentials = json.loads(response.content)
 
     # upload latest data
-
+  
     s3mapbox = boto3.client('s3', aws_access_key_id=s3_credentials["accessKeyId"], aws_secret_access_key=s3_credentials["secretAccessKey"], aws_session_token=s3_credentials["sessionToken"])
     s3mapbox.upload_file("trees.csv", s3_credentials["bucket"], s3_credentials["key"])
 
