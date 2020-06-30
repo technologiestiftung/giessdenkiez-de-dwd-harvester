@@ -1,5 +1,8 @@
-# dwd-radolan-tree-harvester
-Gather precipitation data from DWD's radolan data set, for the region of Berlin and connect to the trees DB
+# giessdenkiez-de-dwd-harvester
+
+- Gather precipitation data from DWD's radolan data set, for the region of Berlin and connect to the giessdenkiez.de postgres DB (AWS RDS)
+- Uploads trees combined with weather data to Mapbox and uses its API to create vector tiles for use on mobile devices
+- Generates CSV and GeoJSON files that contain trees locations and weather data (grid) and uploads them to a AWS S3 
 
 ## Pre-Install
 
