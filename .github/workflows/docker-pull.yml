@@ -1,0 +1,26 @@
+# Yes this sucks. We need to pull all the images once every six month
+# so we dont loose them to the new docker rentention period
+# We wont migrate this application to github packages but might use it
+# for future images
+
+name: Docker Pull Perdiodically
+on:
+  # https://crontab.guru/#0_8_1_*_*
+  schedule:
+    - cron: '0 12 1 * *'
+jobs:
+  pull:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Pull them
+        run: |
+          tag=$(git describe --abbrev=0 --tags)
+          images=(
+            "technologiestiftung/dwd-radolan-tree-harvester:${tag}"
+            "technologiestiftung/dwd-radolan-tree-harvester:latest"
+          )
+          for i in "${images[@]}"; do
+            docker pull "$i"
+          done
