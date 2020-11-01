@@ -5,6 +5,7 @@
 
 name: Docker Pull Perdiodically
 on:
+  workflow_dispatch:
   # https://crontab.guru/#0_8_1_*_*
   schedule:
     - cron: '0 12 1 * *'
@@ -16,7 +17,7 @@ jobs:
         uses: actions/checkout@v2
       - name: Pull them
         run: |
-          tag=$(git describe --abbrev=0 --tags)
+          tag=v1.1.4
           images=(
             "technologiestiftung/giessdenkiez-de-dwd-harvester:${tag}"
             "technologiestiftung/giessdenkiez-de-dwd-harvester:latest"
