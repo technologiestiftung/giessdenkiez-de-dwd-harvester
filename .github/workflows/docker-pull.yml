@@ -3,7 +3,7 @@
 # We wont migrate this application to github packages but might use it
 # for future images
 
-name: Docker Pull Perdiodically
+name: Docker Pull Periodically
 on:
   workflow_dispatch:
   # https://crontab.guru/#0_8_1_*_*
@@ -17,10 +17,8 @@ jobs:
         uses: actions/checkout@v2
       - name: Pull them
         run: |
-          tag=v1.1.4
           images=(
-            "technologiestiftung/giessdenkiez-de-dwd-harvester:${tag}"
-            "technologiestiftung/giessdenkiez-de-dwd-harvester:latest"
+            "technologiestiftung/giessdenkiez-de-dwd-harvester:v1.1.4
             "technologiestiftung/dwd-radolan-tree-harvester:latest"
             "technologiestiftung/dwd-radolan-tree-harvester:1.1.3"
           )
