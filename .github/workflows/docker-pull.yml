@@ -18,7 +18,7 @@ jobs:
       - name: Pull them
         run: |
           images=(
-            "technologiestiftung/giessdenkiez-de-dwd-harvester:v1.1.4
+            "technologiestiftung/giessdenkiez-de-dwd-harvester:v1.1.4"
             "technologiestiftung/dwd-radolan-tree-harvester:latest"
             "technologiestiftung/dwd-radolan-tree-harvester:1.1.3"
           )
