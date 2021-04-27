@@ -13,21 +13,6 @@
       "request": "launch",
       "program": "${file}",
       "console": "externalTerminal"
-    },
-    {
-      "name": "Docker: Python - General",
-      "type": "docker",
-      "request": "launch",
-      "preLaunchTask": "docker-run: debug",
-      "python": {
-        "pathMappings": [
-          {
-            "localRoot": "${workspaceFolder}/harvester",
-            "remoteRoot": "/app"
-          }
-        ],
-        "projectType": "general"
-      }
     }
   ]
 }

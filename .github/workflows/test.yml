@@ -1,0 +1,42 @@
+name: test harvester
+
+on:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+
+env:
+  PG_SERVER: ${{ secrets.PG_SERVER }}
+  PG_PORT: 5432
+  PG_USER: ${{ secrets.PG_USER }}
+  PG_PASS: ${{ secrets.PG_PASS }}
+  PG_DB: ${{ secrets.PG_DB }}
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+  S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
+  OUTPUT: True
+  MAPBOXUSERNAME: "123"
+  MAPBOXTOKEN: "456"
+  LOGGING: INFO
+
+jobs:
+  test-harvest:
+    runs-on: ubuntu-18.04
+    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    services:
+      postgres:
+        image: postgis/postgis:11-2.5-alpine
+        ports:
+          - 5432:5432
+    steps:
+      - name: Get the source
+        uses: actions/checkout@v2
+      - name: Use Node.js 14
+        uses: actions/setup-node@v2
+        with:
+          node-version: 14
+      - name: Get giessdenkiez-de-postgres-api
+        run: git clone https://github.com/technologiestiftung/giessdenkiez-de-postgres-api.git api
+      - name: install node dependencies
+        run: cd api && npm ci

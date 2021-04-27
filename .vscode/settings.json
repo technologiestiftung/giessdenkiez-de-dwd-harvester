@@ -13,10 +13,7 @@
     "titleBar.inactiveForeground": "#15202b99",
     "statusBar.background": "#77b0d6",
     "statusBarItem.hoverBackground": "#5099ca",
-    "statusBar.foreground": "#15202b",
-    "statusBar.border": "#77b0d6",
-    "titleBar.border": "#77b0d6"
+    "statusBar.foreground": "#15202b"
   },
-  "peacock.color": "#77b0d6",
-  "python.pythonPath": "/Users/icke/.pyenv/versions/3.8.2/bin/python3.8"
+  "peacock.color": "#77b0d6"
 }

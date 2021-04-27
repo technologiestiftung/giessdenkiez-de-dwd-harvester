@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
   # https://crontab.guru/#0_8_1_*_*
   schedule:
-    - cron: '0 12 1 * *'
+    - cron: "0 12 1 * *"
 jobs:
   pull:
     runs-on: ubuntu-latest
