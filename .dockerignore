@@ -25,3 +25,5 @@
 README.md
 LICENSE
 .env
+docker-build-and-push.sh
+sample.env

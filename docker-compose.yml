@@ -1,14 +1,29 @@
-version: '3.4'
+version: "3.4"
 
 services:
   harvester:
-    image: "dwd-radolan-tree-harvester"
     build:
       context: ./harvester
       dockerfile: Dockerfile
     depends_on:
       - postgres
+    volumes:
+      - ./harvester:/app
     env_file: ./harvester/.env
+    environment:
+      PG_DB: trees
+      PG_SERVER: postgres
+      PG_PORT: 5432
+      PG_USER: fangorn
+      PG_PASS: ent
+      # AWS_ACCESS_KEY_ID: 123
+      # AWS_SECRET_ACCESS_KEY: 456
+      # S3_BUCKET: xyz
+      MAPBOXUSERNAME: 123
+      MAPBOXTOKEN: 456
+      OUTPUT: "True"
+      LOGGING: INFO
+    command: ["tail", "-f", "/dev/null"]
 
   postgres:
     container_name: "postgres"
@@ -17,6 +32,8 @@ services:
       context: ./dev-db
       dockerfile: Dockerfile
     environment:
-      POSTGRES_PASSWORD: postgres_password
+      POSTGRES_USER: fangorn
+      POSTGRES_DB: trees
+      POSTGRES_PASSWORD: ent
     ports:
-      - '5432:5432'
+      - "5432:5432"
