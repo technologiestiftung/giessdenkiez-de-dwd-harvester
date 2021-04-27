@@ -40,6 +40,8 @@ jobs:
         ports:
           - 5432:5432
     steps:
+      - name: debugging
+        run: echo "$PG_USER $PG_PASS $PG_DB"
       - name: Get the source
         uses: actions/checkout@v2
       - name: Use Node.js 14
