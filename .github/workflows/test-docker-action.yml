@@ -1,4 +1,4 @@
-name: test harvester
+name: test harvester docker action
 
 on:
   # push:
