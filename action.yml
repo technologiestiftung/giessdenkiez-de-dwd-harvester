@@ -41,7 +41,7 @@ inputs:
     default: "INFO"
 runs:
   using: "docker"
-  image: "Dockerfile"
+  image: "harvester/Dockerfile"
   env:
     PG_SERVER: ${{ inputs.PG_SERVER }}
     PG_PORT: ${{ inputs.PG_PORT }}
