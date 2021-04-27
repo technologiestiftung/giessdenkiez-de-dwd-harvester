@@ -1,0 +1,57 @@
+name: "Giessdenkiez.de DWD Harvester"
+description: "Collect rain data from the DWD for the giessdenkiez.de app"
+inputs:
+  PG_SERVER:
+    description: The server where the PG DB lives
+    required: true
+  PG_PORT:
+    required: true
+    default: 5432
+  PG_USER:
+    required: true
+    description: ""
+  PG_PASS:
+    required: true
+    description: ""
+  PG_DB:
+    required: true
+    description: ""
+  AWS_ACCESS_KEY_ID:
+    required: true
+    description: ""
+  AWS_SECRET_ACCESS_KEY:
+    required: true
+    description: ""
+  S3_BUCKET:
+    description: ""
+    required: true
+  OUTPUT:
+    description: ""
+    required: true
+    default: "True"
+  MAPBOXUSERNAME:
+    description: ""
+    required: true
+  MAPBOXTOKEN:
+    description: ""
+    required: true
+  LOGGING:
+    description: ""
+    required: true
+    default: "INFO"
+runs:
+  using: "docker"
+  image: "./harvester/Dockerflie"
+  env:
+    PG_SERVER: ${{ inputs.PG_SERVER }}
+    PG_PORT: ${{ inputs.PG_PORT }}
+    PG_USER: ${{ inputs.PG_USER }}
+    PG_PASS: ${{ inputs.PG_PASS }}
+    PG_DB: ${{ inputs.PG_DB }}
+    AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
+    AWS_SECRET_ACCESS_KEY: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
+    S3_BUCKET: ${{ inputs.S3_BUCKET }}
+    MAPBOXUSERNAME: ${{ inputs.MAPBOXUSERNAME }}
+    MAPBOXTOKEN: ${{ inputs.MAPBOXTOKEN }}
+    LOGGING: ${{ inputs.LOGGING }}
+    DATABASE_URL: ${{ inputs.DATABASE_URL }}

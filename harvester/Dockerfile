@@ -16,20 +16,19 @@ ENV C_INCLUDE_PATH=/usr/include/gdal
 
 FROM base as builder
 
-WORKDIR /app
+
 # Install pip requirements
 COPY requirements.txt /app
-RUN python -m pip install --no-warn-script-location --prefix=/install -r requirements.txt
+RUN cd /app && python -m pip install --no-warn-script-location --prefix=/install -r requirements.txt
 
 FROM base as app
 COPY --from=builder /install /usr/local
-WORKDIR /app
+
 # COPY harvester.py /app/
 # COPY prepare.py /app/
 # COPY grid/ grid/
 # COPY assets/ /app/assets
-COPY . .
-# COPY . /app
+COPY . /app
 
-# During debugging, this entry point will be overridden. For more information, refer to https://aka.ms/vscode-docker-python-debug
-CMD ["python", "harvester.py"]
+
+CMD ["python", "/app/harvester.py"]
