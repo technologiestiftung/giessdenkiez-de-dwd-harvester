@@ -14,3 +14,8 @@ aws_access_key_id     = "xxxx"
 aws_secret_access_key = "xxxx"
 s3_bucket             = "xxxx"
 output                = "True"
+
+
+mapboxusername = ""
+mapboxtileset = ""
+mapboxtoken = ""
