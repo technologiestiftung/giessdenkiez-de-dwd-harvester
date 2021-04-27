@@ -14,6 +14,10 @@ import logging
 import os
 import sys
 import math
+import boto3
+import requests
+import json
+
 
 # setting up logging
 logging.basicConfig()
@@ -285,7 +289,6 @@ if len(filelist) > 0:
 
     # generate gejson for map and upload to S3
     logging.info("generate geojson 🗺️")
-    import boto3
     s3 = boto3.client('s3', aws_access_key_id=os.getenv(
         "ACCESS_KEY"), aws_secret_access_key=os.getenv("SECRET_KEY"))
 
@@ -381,42 +384,41 @@ if len(filelist) > 0:
 
         # send the updated csv to mapbox
 
-        import requests
-        import json
-
         # get upload credentials
-
-        url = "https://api.mapbox.com/uploads/v1/{}/credentials?access_token={}".format(
-            os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTOKEN"))
-        response = requests.post(url)
-        s3_credentials = json.loads(response.content)
+        try:
+            url = "https://api.mapbox.com/uploads/v1/{}/credentials?access_token={}".format(
+                os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTOKEN"))
+            response = requests.post(url)
+            s3_credentials = json.loads(response.content)
 
         # upload latest data
 
-        s3mapbox = boto3.client('s3', aws_access_key_id=s3_credentials["accessKeyId"],
-                                aws_secret_access_key=s3_credentials["secretAccessKey"], aws_session_token=s3_credentials["sessionToken"])
-        s3mapbox.upload_file(path + "trees.csv",
-                             s3_credentials["bucket"], s3_credentials["key"])
+            s3mapbox = boto3.client('s3', aws_access_key_id=s3_credentials["accessKeyId"],
+                                    aws_secret_access_key=s3_credentials["secretAccessKey"], aws_session_token=s3_credentials["sessionToken"])
+            s3mapbox.upload_file(path + "trees.csv",
+                                 s3_credentials["bucket"], s3_credentials["key"])
 
         # tell mapbox that new data has arrived
 
-        url = "https://api.mapbox.com/uploads/v1/{}?access_token={}".format(
-            os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTOKEN"))
-        payload = '{{"url":"http://{}.s3.amazonaws.com/{}","tileset":"{}.{}"}}'.format(
-            s3_credentials["bucket"], s3_credentials["key"], os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTILESET"))
-        headers = {'content-type': 'application/json',
-                   'Accept-Charset': 'UTF-8', 'Cache-Control': 'no-cache'}
-        response = requests.post(url, data=payload, headers=headers)
-
+            url = "https://api.mapbox.com/uploads/v1/{}?access_token={}".format(
+                os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTOKEN"))
+            payload = '{{"url":"http://{}.s3.amazonaws.com/{}","tileset":"{}.{}"}}'.format(
+                s3_credentials["bucket"], s3_credentials["key"], os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTILESET"))
+            headers = {'content-type': 'application/json',
+                       'Accept-Charset': 'UTF-8', 'Cache-Control': 'no-cache'}
+            response = requests.post(url, data=payload, headers=headers)
+            # wohooo!
+            logging.info("✅ Map updated to timespan: {} to {}".format(
+                startdate, enddate))
+        except:
+            logging.warning(
+                "could not upload tree data to mapbox for vector tiles")
         trees_csv = None
         csv_data = None
 
     # remove all temporary files
     shutil.rmtree(path)
 
-    # wohooo!
-    logging.info("✅ Map updated to timespan: {} to {}".format(
-        startdate, enddate))
 else:
     logging.info("No updates")
 
