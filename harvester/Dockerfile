@@ -28,7 +28,7 @@ COPY --from=builder /install /usr/local
 # COPY prepare.py /app/
 # COPY grid/ grid/
 # COPY assets/ /app/assets
-COPY . /app
+COPY . /app/
 
 
 CMD ["python", "/app/harvester.py"]
