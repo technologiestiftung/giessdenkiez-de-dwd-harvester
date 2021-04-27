@@ -12,10 +12,10 @@ env:
   PG_USER: fangorn # ${{ secrets.PG_USER }}
   PG_PASS: ent # ${{ secrets.PG_PASS }}
   PG_DB: trees # ${{ secrets.PG_DB }}
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-  S3_BUCKET: ${{ secrets.AWS_S3_BUCKET }}
-  OUTPUT: True
+  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_TEST }}
+  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST }}
+  S3_BUCKET: ${{ secrets.AWS_S3_BUCKET_TEST }}
+  OUTPUT: "True"
   MAPBOXUSERNAME: "123"
   MAPBOXTOKEN: "456"
   LOGGING: INFO
@@ -29,9 +29,9 @@ jobs:
       postgres:
         image: postgis/postgis:11-2.5-alpine
         env:
-          POSTGRES_USER: fangorn
-          POSTGRES_DB: trees
-          POSTGRES_PASSWORD: ent
+          POSTGRES_USER: $PG_USER
+          POSTGRES_DB: $PG_DB
+          POSTGRES_PASSWORD: $PG_PASS
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -56,3 +56,5 @@ jobs:
         run: cd api && npm run prisma:seed:dangerously
       - name: build the harvester
         run: cd harvester && docker build --tag technologiestiftung/giessdenkiez-de-dwd-harvester:test .
+      - name: run the harvester
+        run: docker run --env PG_DB --env PG_PORT --env PG_USER --env PG_PASS --env AWS_SECRET_ACCESS_KEY --env AWS_ACCESS_KEY_ID --env S3_BUCKET --env MAPBOXTOKEN --MAPBOXUSERNAME --env LOGGING --env OUTPUT technologiestiftung/giessdenkiez-de-dwd-harvester:test
