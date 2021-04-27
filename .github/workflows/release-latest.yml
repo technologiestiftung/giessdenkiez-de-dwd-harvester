@@ -6,15 +6,15 @@ env:
   HARVESTER_FOLDER: harvester/
 
 on:
-  push:
-    branches:
-      - master
-    paths:
-      - harvester/*.py
-      - harvester/Dockerfile
-      - harvester/assets/**/*
-      - harvester/requirements.txt
-
+  workflow_dispatch:
+  # push:
+  #   branches:
+  #     - master
+  #   paths:
+  #     - harvester/*.py
+  #     - harvester/Dockerfile
+  #     - harvester/assets/**/*
+  #     - harvester/requirements.txt
 
 jobs:
   build:
@@ -24,7 +24,7 @@ jobs:
       - name: Get the source
         uses: actions/checkout@v2
       - name: Docker login, build and push
-        run:  |
+        run: |
           cd $HARVESTER_FOLDER
           echo "$DOCKER_PASSWORD" |  docker login -u "$DOCKER_USERNAME" --password-stdin
           docker build --tag "${GITHUB_REPOSITORY}:latest" .
