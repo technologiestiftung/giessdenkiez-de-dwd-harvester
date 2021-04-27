@@ -85,7 +85,6 @@ cmdline = [
 subprocess.call(cmdline)
 
 df = geopandas.read_file(temp + "/grid.shp")
-df = df.set_crs("epsg:31467")
 df = df.to_crs("epsg:4326")
 
 if df['geometry'].count() > 0:
