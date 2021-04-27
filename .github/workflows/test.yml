@@ -54,3 +54,5 @@ jobs:
         run: cd api && npm run prisma:push:dangerously
       - name: prisma db seed
         run: cd api && npm run prisma:seed:dangerously
+      - name: build the harvester
+        run: cd harvester && docker build --tag technologiestiftung/giessdenkiez-de-dwd-harvester:test .
