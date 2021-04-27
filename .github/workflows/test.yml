@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  PG_SERVER: postgres # ${{ secrets.PG_SERVER }}
+  PG_SERVER: localhost #postgres # ${{ secrets.PG_SERVER }}
   PG_PORT: 5432
   PG_USER: fangorn # ${{ secrets.PG_USER }}
   PG_PASS: ent # ${{ secrets.PG_PASS }}
@@ -29,9 +29,9 @@ jobs:
       postgres:
         image: postgis/postgis:11-2.5-alpine
         env:
-          POSTGRES_USER: $PG_USER
-          POSTGRES_DB: $PG_DB
-          POSTGRES_PASSWORD: $PG_PASS
+          POSTGRES_USER: "$PG_USER"
+          POSTGRES_DB: "$PG_DB"
+          POSTGRES_PASSWORD: "$PG_PASS"
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -57,4 +57,4 @@ jobs:
       - name: build the harvester
         run: cd harvester && docker build --tag technologiestiftung/giessdenkiez-de-dwd-harvester:test .
       - name: run the harvester
-        run: docker run --env PG_DB --env PG_PORT --env PG_USER --env PG_PASS --env AWS_SECRET_ACCESS_KEY --env AWS_ACCESS_KEY_ID --env S3_BUCKET --env MAPBOXTOKEN --MAPBOXUSERNAME --env LOGGING --env OUTPUT technologiestiftung/giessdenkiez-de-dwd-harvester:test
+        run: docker run --env "$PG_DB" --env "$PG_PORT" --env "$PG_USER" --env "$PG_PASS" --env "$AWS_SECRET_ACCESS_KEY "--env "$AWS_ACCESS_KEY_ID" --env "$S3_BUCKET" --env "$MAPBOXTOKEN" --env "$MAPBOXUSERNAME" --env "$LOGGING" --env "$OUTPUT" --network host technologiestiftung/giessdenkiez-de-dwd-harvester:test
