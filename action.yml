@@ -35,6 +35,9 @@ inputs:
   MAPBOXTOKEN:
     description: ""
     required: true
+  MAPBOXTILESET:
+    description: ""
+    required: true
   LOGGING:
     description: ""
     required: true
