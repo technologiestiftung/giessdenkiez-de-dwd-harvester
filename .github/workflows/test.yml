@@ -7,17 +7,18 @@ on:
   workflow_dispatch:
 
 env:
-  PG_SERVER: localhost #postgres # ${{ secrets.PG_SERVER }}
+  PG_SERVER: localhost
   PG_PORT: 5432
-  PG_USER: fangorn # ${{ secrets.PG_USER }}
-  PG_PASS: ent # ${{ secrets.PG_PASS }}
-  PG_DB: trees # ${{ secrets.PG_DB }}
+  PG_USER: fangorn
+  PG_PASS: ent
+  PG_DB: trees
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_TEST }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST }}
   S3_BUCKET: ${{ secrets.AWS_S3_BUCKET_TEST }}
   OUTPUT: "True"
   MAPBOXUSERNAME: "123"
   MAPBOXTOKEN: "456"
+  MAPBOXTILESET: "xyz"
   LOGGING: INFO
   DATABASE_URL: postgresql://fangorn:ent@localhost:5432/trees?schema=public
 
