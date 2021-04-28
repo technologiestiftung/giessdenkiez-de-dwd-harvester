@@ -6,70 +6,71 @@ on:
   #     - master
   workflow_dispatch:
 
-env:
-  PG_SERVER: localhost #postgres # ${{ secrets.PG_SERVER }}
-  PG_PORT: 5432
-  PG_USER: fangorn # ${{ secrets.PG_USER }}
-  PG_PASS: ent # ${{ secrets.PG_PASS }}
-  PG_DB: trees # ${{ secrets.PG_DB }}
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_TEST }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST }}
-  S3_BUCKET: ${{ secrets.AWS_S3_BUCKET_TEST }}
-  OUTPUT: "True"
-  MAPBOXUSERNAME: "123"
-  MAPBOXTOKEN: "456"
-  LOGGING: INFO
-  DATABASE_URL: postgresql://fangorn:ent@localhost:5432/trees?schema=public
+# env:
+#   PG_SERVER: localhost #postgres # ${{ secrets.PG_SERVER }}
+#   PG_PORT: 5432
+#   PG_USER: fangorn # ${{ secrets.PG_USER }}
+#   PG_PASS: ent # ${{ secrets.PG_PASS }}
+#   PG_DB: trees # ${{ secrets.PG_DB }}
+#   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_TEST }}
+#   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST }}
+#   S3_BUCKET: ${{ secrets.AWS_S3_BUCKET_TEST }}
+#   OUTPUT: "True"
+#   MAPBOXUSERNAME: "123"
+#   MAPBOXTOKEN: "456"
+#   LOGGING: INFO
+#   DATABASE_URL: postgresql://fangorn:ent@localhost:5432/trees?schema=public
 
 jobs:
   test-harvest:
+    environment: remote-development
     runs-on: ubuntu-18.04
     if: "!contains(github.event.head_commit.message, 'ci skip')"
-    services:
-      postgres:
-        image: postgis/postgis:11-2.5-alpine
-        env:
-          POSTGRES_USER: fangorn
-          POSTGRES_DB: trees
-          POSTGRES_PASSWORD: ent
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
+    # services:
+    #   postgres:
+    #     image: postgis/postgis:11-2.5-alpine
+    #     env:
+    #       POSTGRES_USER: fangorn
+    #       POSTGRES_DB: trees
+    #       POSTGRES_PASSWORD: ent
+    #     options: >-
+    #       --health-cmd pg_isready
+    #       --health-interval 10s
+    #       --health-timeout 5s
+    #       --health-retries 5
+    #     ports:
+    #       - 5432:5432
     steps:
       - name: Get the source
         uses: actions/checkout@v2
-      - name: Use Node.js 14
-        uses: actions/setup-node@v2
-        with:
-          node-version: 14
-      - name: Get giessdenkiez-de-postgres-api
-        run: git clone https://github.com/technologiestiftung/giessdenkiez-de-postgres-api.git api
-      - name: install node dependencies
-        run: cd api && npm ci
-      - name: prisma db push
-        run: cd api && npm run prisma:push:dangerously
-      - name: prisma db seed
-        run: cd api && npm run prisma:seed:dangerously
+      # - name: Use Node.js 14
+      # uses: actions/setup-node@v2
+      # with:
+      #   node-version: 14
+      # - name: Get giessdenkiez-de-postgres-api
+      #   run: git clone https://github.com/technologiestiftung/giessdenkiez-de-postgres-api.git api
+      # - name: install node dependencies
+      #   run: cd api && npm ci
+      # - name: prisma db push
+      #   run: cd api && npm run prisma:push:dangerously
+      # - name: prisma db seed
+      #   run: cd api && npm run prisma:seed:dangerously
       - name: Harvester Action
         uses: ./
         id: harvester
         with:
-          PG_SERVER: "0.0.0.0"
-          PG_PORT: 5432
-          PG_USER: fangorn
-          PG_PASS: ent
-          PG_DB: trees
-          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_TEST }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST }}
-          S3_BUCKET: ${{ secrets.S3_BUCKET_TEST }}
+          PG_SERVER: ${{ secrets.PG_SERVER }}
+          PG_PORT: ${{ secrets.PG_PORT }}
+          PG_USER: ${{ secrets.PG_USER }}
+          PG_PASS: ${{ secrets.PG_PASS }}
+          PG_DB: ${{ secrets.PG_DB }}
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+          S3_BUCKET: ${{ secrets.S3_BUCKET }}
           OUTPUT: "True"
+          LOGGING: "INFO"
           MAPBOXUSERNAME: 123
           MAPBOXTOKEN: 456
-          LOGGING: "INFO"
       # - name: build the harvester
       #   run: cd harvester && docker build --tag technologiestiftung/giessdenkiez-de-dwd-harvester:test .
       # - name: run the harvester
