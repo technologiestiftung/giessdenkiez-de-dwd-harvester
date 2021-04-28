@@ -7,14 +7,14 @@ env:
 
 on:
   workflow_dispatch:
-  # push:
-  #   branches:
-  #     - master
-  #   paths:
-  #     - harvester/*.py
-  #     - harvester/Dockerfile
-  #     - harvester/assets/**/*
-  #     - harvester/requirements.txt
+  push:
+    branches:
+      - master
+    paths:
+      - harvester/*.py
+      - harvester/Dockerfile
+      - harvester/assets/**/*
+      - harvester/requirements.txt
 
 jobs:
   build:
