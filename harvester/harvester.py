@@ -55,6 +55,7 @@ pg_database = os.getenv("PG_DB")
 dsn = f"host='{pg_server}' port={pg_port} user='{pg_username}' password='{pg_password}' dbname='{pg_database}'"
 
 logging.info("🆙 Starting harvester v0.5")
+logging.info(pg_server)
 # get last day of insert
 last_date = None
 
