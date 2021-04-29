@@ -1,15 +1,12 @@
 import sys
 import os
 import logging
-import gzip
-import shutil
 import psycopg2
 import psycopg2.extras
 import geopandas
 import subprocess
 import numpy
 import linecache
-import glob
 from shapely.wkt import dumps
 from dotenv import load_dotenv
 load_dotenv()
@@ -17,7 +14,7 @@ load_dotenv()
 logging.basicConfig()
 logging.root.setLevel(logging.INFO)
 
-# temp folder
+# name of folder that contains the data
 temp = "temp"
 # if os.path.isdir(temp) != True:
 #   os.mkdir(temp)
