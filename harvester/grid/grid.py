@@ -67,7 +67,10 @@ header = linecache.getline(temp + "/grid.asc", 1) + \
 
 numpy.savetxt(temp + "/grid-transform.asc", asc_data,
               header=header.rstrip(), comments='', fmt='%i')
-# TODO: [GDK-128] Explain what gdalwarp is doing here. How could this be done for e.g. Köln
+
+# use gdalwarp as commandline tool to crop the example weather dataset to the outline of our area of interest that is defined by the file buffer.shp
+# with the arguments -s_srs and -t-srs we set the spatial reference systems for the source and the target files
+# for our example weather data the srs is: "+proj=stere +lon_0=10.0 +lat_0=90.0 +lat_ts=60.0 +a=6370040 +b=6370040 +units=m"
 cmdline = ['gdalwarp', temp + "/grid-transform.asc", temp + "/grid-buffer.asc", "-s_srs", "+proj=stere +lon_0=10.0 +lat_0=90.0 +lat_ts=60.0 +a=6370040 +b=6370040 +units=m",
            "-t_srs", "+proj=stere +lon_0=10.0 +lat_0=90.0 +lat_ts=60.0 +a=6370040 +b=6370040 +units=m", "-r", "near", "-of", "GTiff", "-cutline", "buffer.shp"]
 subprocess.call(cmdline)
