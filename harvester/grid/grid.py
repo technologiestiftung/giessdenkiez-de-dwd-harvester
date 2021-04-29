@@ -1,3 +1,10 @@
+""" This script creates a grid of polygons for the area of interest. Current precipitation data can then be assigned to these cells using the harvester.py script.
+
+Input:
+    buffer.shp: Shapefile containing the outline of the area of interest as a polygon
+    grid.asc: An example raster file conatining precipitation data for whole Germany
+"""
+
 import sys
 import os
 import logging
