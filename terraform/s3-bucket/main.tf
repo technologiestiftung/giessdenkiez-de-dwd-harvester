@@ -1,7 +1,7 @@
 provider "aws" {
   profile = var.profile
   region  = var.region
-  version = "~> 2.55"
+  version = "~> 3.0"
 }
 
 output "s3-bucket-name-radolan" {
