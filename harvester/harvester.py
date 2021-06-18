@@ -268,6 +268,10 @@ if len(filelist) > 0:
         values.append([clean[cellindex], sum(clean[cellindex]), cell[1]])
 
     with conn.cursor() as cur:
+        cur.execute("UPDATE trees SET radolan_sum = Null;")
+        conn.commit()
+
+    with conn.cursor() as cur:
         psycopg2.extras.execute_batch(
             cur,
             "UPDATE trees SET radolan_days = %s, radolan_sum = %s WHERE ST_CoveredBy(geom, ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326));",
