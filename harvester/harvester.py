@@ -407,7 +407,10 @@ if len(filelist) > 0:
             headers = {'content-type': 'application/json',
                        'Accept-Charset': 'UTF-8', 'Cache-Control': 'no-cache'}
             response = requests.post(url, data=payload, headers=headers)
-            # wohooo!
+            
+            logging.info("Das ist die response: ")
+            logging.info(response)
+            logging.info(type(response))
             logging.info("✅ Map updated to timespan: {} to {}".format(
                 startdate, enddate))
         except:
