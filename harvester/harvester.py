@@ -407,6 +407,8 @@ if len(filelist) > 0:
             headers = {'content-type': 'application/json',
                        'Accept-Charset': 'UTF-8', 'Cache-Control': 'no-cache'}
             response = requests.post(url, data=payload, headers=headers)
+            logging.info(os.getenv("MAPBOXTILESET"))
+            logging.info(payload)
             # wohooo!
             logging.info("✅ Map updated to timespan: {} to {}".format(
                 startdate, enddate))
