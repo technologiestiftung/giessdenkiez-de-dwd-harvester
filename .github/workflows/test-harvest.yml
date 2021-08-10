@@ -1,4 +1,4 @@
-name: test harvester
+name: harvester (test mode)
 
 on:
   push:
