@@ -24,6 +24,7 @@ services:
       MAPBOXUSERNAME: "123"
       MAPBOXTOKEN: "456"
       MAPBOXTILESET: "xyz"
+      MAPBOXLAYERNAME: "abc"
 
       OUTPUT: "True"
       LOGGING: INFO

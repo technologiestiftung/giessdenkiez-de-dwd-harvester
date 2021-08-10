@@ -22,6 +22,7 @@ env:
   MAPBOXUSERNAME: "123"
   MAPBOXTOKEN: "456"
   MAPBOXTILESET: "xyz"
+  MAPBOXLAYERNAME: "abc"
   LOGGING: INFO
   DATABASE_URL: postgresql://fangorn:ent@localhost:5432/trees?schema=public
 
