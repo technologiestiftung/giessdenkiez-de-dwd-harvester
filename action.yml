@@ -56,5 +56,6 @@ runs:
     S3_BUCKET: ${{ inputs.S3_BUCKET }}
     MAPBOXUSERNAME: ${{ inputs.MAPBOXUSERNAME }}
     MAPBOXTOKEN: ${{ inputs.MAPBOXTOKEN }}
+    MAPBOXTILESET: ${{ inputs.MAPBOXTILESET }}
     LOGGING: ${{ inputs.LOGGING }}
     DATABASE_URL: ${{ inputs.DATABASE_URL }}
