@@ -38,6 +38,9 @@ inputs:
   MAPBOXTILESET:
     description: ""
     required: true
+  MAPBOXLAYERNAME:
+    description: "The layer within the tileset that holds the trees data"
+    required: true
   LOGGING:
     description: ""
     required: true
@@ -57,5 +60,6 @@ runs:
     MAPBOXUSERNAME: ${{ inputs.MAPBOXUSERNAME }}
     MAPBOXTOKEN: ${{ inputs.MAPBOXTOKEN }}
     MAPBOXTILESET: ${{ inputs.MAPBOXTILESET }}
+    MAPBOXLAYERNAME: ${{ inputs.MAPBOXLAYERNAME }}
     LOGGING: ${{ inputs.LOGGING }}
     DATABASE_URL: ${{ inputs.DATABASE_URL }}
