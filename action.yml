@@ -2,20 +2,21 @@ name: "Giessdenkiez.de DWD Harvester"
 description: "Collect rain data from the DWD for the giessdenkiez.de app"
 inputs:
   PG_SERVER:
-    description: The server where the PG DB lives
+    description: "The server where the PostgreSQL database lives"
     required: true
   PG_PORT:
     required: true
+    description: "The port of the PostgreSQL database"
     default: 5432
   PG_USER:
     required: true
-    description: ""
+    description: "The user of the PostgreSQL database"
   PG_PASS:
     required: true
-    description: ""
+    description: "The password of the PostgreSQL database"
   PG_DB:
     required: true
-    description: ""
+    description: "The name of the PostgreSQL database"
   AWS_ACCESS_KEY_ID:
     required: true
     description: ""
@@ -30,13 +31,13 @@ inputs:
     required: true
     default: "True"
   MAPBOXUSERNAME:
-    description: ""
+    description: "The Mapbox account to which the tileset is sent"
     required: true
   MAPBOXTOKEN:
-    description: ""
+    description: "The associated token of the Mapbox account"
     required: true
   MAPBOXTILESET:
-    description: ""
+    description: "The name the tileset should receive"
     required: true
   MAPBOXLAYERNAME:
     description: "The layer within the tileset that holds the trees data"
