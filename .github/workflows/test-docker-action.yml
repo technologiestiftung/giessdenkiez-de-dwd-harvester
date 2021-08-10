@@ -33,3 +33,4 @@ jobs:
           MAPBOXUSERNAME: ${{ secrets.MAPBOXUSERNAME }}
           MAPBOXTOKEN: ${{ secrets.MAPBOXTOKEN }}
           MAPBOXTILESET: ${{ secrets.MAPBOXTILESET }}
+          MAPBOXTILESETDEV: ${{ secrets.MAPBOXTILESETDEV }}
