@@ -403,7 +403,7 @@ if len(filelist) > 0:
             url = "https://api.mapbox.com/uploads/v1/{}?access_token={}".format(
                 os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTOKEN"))
             payload = '{{"url":"http://{}.s3.amazonaws.com/{}","tileset":"{}.{}"}}'.format(
-                s3_credentials["bucket"], s3_credentials["key"], os.getenv("MAPBOXUSERNAME"), "gdktest")
+                s3_credentials["bucket"], s3_credentials["key"], os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTILESET"))
             headers = {'content-type': 'application/json',
                        'Accept-Charset': 'UTF-8', 'Cache-Control': 'no-cache'}
             response = requests.post(url, data=payload, headers=headers)
