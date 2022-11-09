@@ -1,4 +1,4 @@
-name: harvest (dev mode)
+name: harvest (dev mode supabase)
 
 on:
   push:
