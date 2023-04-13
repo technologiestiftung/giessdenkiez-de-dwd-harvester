@@ -340,7 +340,9 @@ if len(filelist) > 0:
         for tree in trees:
             newLine = "\n"
             newLine += "{},{},{},{}".format(tree[0], tree[1], tree[2], tree[3])
-            if tree[4] is not None:
+            if tree[4] is None:
+                newLine += ","
+            else:
                 newLine += ",{}".format(int(tree[4]))
             singleCSV += newLine
             trees_csv += newLine
