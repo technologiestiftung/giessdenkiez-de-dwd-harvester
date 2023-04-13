@@ -27,6 +27,8 @@ jobs:
           PG_DB: ${{ secrets.PG_DB }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+          SECRET_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY}}
+          ACCESS_KEY: ${{ secrets.AWS_ACCESS_KEY_ID}}
           S3_BUCKET: ${{ secrets.S3_BUCKET }}
           OUTPUT: "True"
           LOGGING: "INFO"
