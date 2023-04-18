@@ -290,7 +290,7 @@ if len(filelist) > 0:
     # generate gejson for map and upload to S3
     logging.info("generate geojson 🗺️")
     s3 = boto3.client('s3', aws_access_key_id=os.getenv(
-        "ACCESS_KEY"), aws_secret_access_key=os.getenv("SECRET_KEY"))
+        "AWS_ACCESS_KEY_ID"), aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"))
 
     features = []
     features_light = []
@@ -340,7 +340,9 @@ if len(filelist) > 0:
         for tree in trees:
             newLine = "\n"
             newLine += "{},{},{},{}".format(tree[0], tree[1], tree[2], tree[3])
-            if tree[4] is not None:
+            if tree[4] is None:
+                newLine += ","
+            else:
                 newLine += ",{}".format(int(tree[4]))
             singleCSV += newLine
             trees_csv += newLine
