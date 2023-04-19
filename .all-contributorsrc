@@ -56,6 +56,16 @@
       "contributions": [
         "doc"
       ]
+    },
+    {
+      "login": "JensWinter",
+      "name": "Jens Winter-Hübenthal",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6548550?v=4",
+      "profile": "https://github.com/JensWinter",
+      "contributions": [
+        "code",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7
