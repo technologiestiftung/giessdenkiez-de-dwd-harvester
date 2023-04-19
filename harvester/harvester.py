@@ -290,7 +290,7 @@ if len(filelist) > 0:
     # generate gejson for map and upload to S3
     logging.info("generate geojson 🗺️")
     s3 = boto3.client('s3', aws_access_key_id=os.getenv(
-        "ACCESS_KEY"), aws_secret_access_key=os.getenv("SECRET_KEY"))
+        "AWS_ACCESS_KEY_ID"), aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"))
 
     features = []
     features_light = []
@@ -328,7 +328,7 @@ if len(filelist) > 0:
     # create a CSV with all trees (id, lat, lng, radolan_sum)
     with conn.cursor() as cur:
         # WARNING: The db is still mislabeled lat <> lng
-        cur.execute("SELECT trees.id, trees.lat, trees.lng, trees.radolan_sum, CASE WHEN LENGTH(trees.pflanzjahr) = 4 THEN date_part('year', CURRENT_DATE) - To_Number(trees.pflanzjahr, '9999') ELSE NULL END AS age FROM trees WHERE ST_CONTAINS(ST_SetSRID((SELECT ST_EXTENT(geometry) FROM radolan_geometry), 4326), trees.geom)")
+        cur.execute("SELECT trees.id, trees.lat, trees.lng, trees.radolan_sum, (date_part('year', CURRENT_DATE) - trees.pflanzjahr) as age FROM trees WHERE ST_CONTAINS(ST_SetSRID (( SELECT ST_EXTENT (geometry) FROM radolan_geometry), 4326), trees.geom)")
         trees = cur.fetchall()
         trees_head = "id,lng,lat,radolan_sum,age"
         trees_csv = trees_head
@@ -340,7 +340,9 @@ if len(filelist) > 0:
         for tree in trees:
             newLine = "\n"
             newLine += "{},{},{},{}".format(tree[0], tree[1], tree[2], tree[3])
-            if tree[4] is not None:
+            if tree[4] is None:
+                newLine += ","
+            else:
                 newLine += ",{}".format(int(tree[4]))
             singleCSV += newLine
             trees_csv += newLine

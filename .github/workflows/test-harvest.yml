@@ -4,17 +4,19 @@ on:
   push:
     branches:
       - master
+      - staging
   pull_request:
     branches:
       - master
+      - staging
   workflow_dispatch:
 
 env:
   PG_SERVER: localhost
-  PG_PORT: 5432
-  PG_USER: fangorn
-  PG_PASS: ent
-  PG_DB: trees
+  PG_PORT: "54322"
+  PG_USER: postgres
+  PG_PASS: postgres
+  PG_DB: postgres
   AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_TEST }}
   AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST }}
   S3_BUCKET: ${{ secrets.AWS_S3_BUCKET_TEST }}
@@ -24,42 +26,62 @@ env:
   MAPBOXTILESET: "xyz"
   MAPBOXLAYERNAME: "abc"
   LOGGING: INFO
-  DATABASE_URL: postgresql://fangorn:ent@localhost:5432/trees?schema=public
+  # DATABASE_URL: postgresql://fangorn:ent@localhost:5432/trees?schema=public
 
 jobs:
   test-harvest:
-    runs-on: ubuntu-18.04
-    if: "!contains(github.event.head_commit.message, 'ci skip')"
-    services:
-      postgres:
-        image: postgis/postgis:11-2.5-alpine
-        env:
-          POSTGRES_USER: fangorn
-          POSTGRES_DB: trees
-          POSTGRES_PASSWORD: ent
-        options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-        ports:
-          - 5432:5432
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
     steps:
       - name: Get the source
-        uses: actions/checkout@v2
-      - name: Use Node.js 14
+        uses: actions/checkout@v3
+      - name: Use Node.js from .nvmrc
         uses: actions/setup-node@v2
         with:
-          node-version: 14
-      - name: Get giessdenkiez-de-postgres-api
-        run: git clone https://github.com/technologiestiftung/giessdenkiez-de-postgres-api.git api
-      - name: install node dependencies
-        run: cd api && npm ci
-      - name: prisma db push
-        run: cd api && npm run prisma:push:dangerously
-      - name: prisma db seed
-        run: cd api && npm run prisma:seed:dangerously
+          node-version-file: ".nvmrc"
+      - name: Get the source for the api staging
+        uses: actions/checkout@v3
+        if: github.event.pull_request.base.ref == 'staging' || github.ref == 'refs/heads/staging'
+        with:
+          repository: technologiestiftung/giessdenkiez-de-postgres-api
+          path: api
+          ref: staging
+      - name: Get the source for the api master
+        uses: actions/checkout@v3
+        if: github.event.pull_request.base.ref == 'master' || github.ref == 'refs/heads/master'
+        with:
+          repository: technologiestiftung/giessdenkiez-de-postgres-api
+          path: api
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 1.33.0
       - name: build the harvester
         run: cd harvester && docker build --tag technologiestiftung/giessdenkiez-de-dwd-harvester:test .
+      - name: Start the api
+        run: cd api && supabase start && cd ..
       - name: run the harvester
-        run: docker run --env PG_SERVER='0.0.0.0' --env PG_DB --env PG_PORT --env PG_USER --env PG_PASS --env AWS_SECRET_ACCESS_KEY --env AWS_ACCESS_KEY_ID --env S3_BUCKET="${{ secrets.S3_BUCKET_TEST }}" --env MAPBOXTOKEN --env MAPBOXUSERNAME --env LOGGING --env OUTPUT --network host technologiestiftung/giessdenkiez-de-dwd-harvester:test
+        run: docker run --env PG_SERVER='0.0.0.0' --env PG_DB --env PG_PORT --env PG_USER --env PG_PASS --env AWS_SECRET_ACCESS_KEY --env AWS_ACCESS_KEY_ID --env S3_BUCKET --env MAPBOXTOKEN --env MAPBOXUSERNAME --env LOGGING --env OUTPUT --network host technologiestiftung/giessdenkiez-de-dwd-harvester:test
+      - name: stop the api
+        run: cd api && supabase stop && cd ..
+  release:
+    name: semantic-release
+    needs: [test-harvest]
+    runs-on: ubuntu-latest
+    outputs:
+      new-release-published: ${{ steps.semantic-release.outputs.new_release_published }}
+      new-release-version: ${{ steps.semantic-release.outputs.new_release_version }}
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v3
+        with:
+          node-version: 18
+      - run: npm ci
+      - id: semantic-release
+        uses: cycjimmy/semantic-release-action@v3
+        with:
+          semantic_version: 18
+        env:
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}

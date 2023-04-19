@@ -19,10 +19,10 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, 'ci skip')"
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
     steps:
       - name: Get the source
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: Docker login, build and push
         run: |
           cd $HARVESTER_FOLDER
