@@ -6,10 +6,67 @@
   "files": [
     "README.md"
   ],
-  "imageSize": 128,
+  "imageSize": 64,
   "commit": true,
   "commitConvention": "angular",
-  "contributors": [],
-  "contributorsPerLine": 7,
-  "linkToUsage": true
+  "contributors": [
+    {
+      "login": "ff6347",
+      "name": "Fabian Morón Zirfas",
+      "avatar_url": "https://avatars.githubusercontent.com/u/315106?v=4",
+      "profile": "https://fabianmoronzirfas.me/",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    },
+    {
+      "login": "sebastian-meier",
+      "name": "Sebastian Meier",
+      "avatar_url": "https://avatars.githubusercontent.com/u/302789?v=4",
+      "profile": "http://www.sebastianmeier.eu/",
+      "contributions": [
+        "code",
+        "doc"
+      ]
+    },
+    {
+      "login": "dnsos",
+      "name": "Dennis Ostendorf",
+      "avatar_url": "https://avatars.githubusercontent.com/u/15640196?v=4",
+      "profile": "https://github.com/dnsos",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "Lisa-Stubert",
+      "name": "Lisa-Stubert",
+      "avatar_url": "https://avatars.githubusercontent.com/u/61182572?v=4",
+      "profile": "https://github.com/Lisa-Stubert",
+      "contributions": [
+        "code"
+      ]
+    },
+    {
+      "login": "vogelino",
+      "name": "Lucas Vogel",
+      "avatar_url": "https://avatars.githubusercontent.com/u/2759340?v=4",
+      "profile": "https://github.com/vogelino",
+      "contributions": [
+        "doc"
+      ]
+    },
+    {
+      "login": "JensWinter",
+      "name": "Jens Winter-Hübenthal",
+      "avatar_url": "https://avatars.githubusercontent.com/u/6548550?v=4",
+      "profile": "https://github.com/JensWinter",
+      "contributions": [
+        "code",
+        "bug"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
 }
