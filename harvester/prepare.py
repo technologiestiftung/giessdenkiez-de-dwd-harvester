@@ -1,7 +1,7 @@
 # building a buffer shape for filtering the weather data
 import os
 import geopandas
-from shapely.ops import unary_union
+from shapely.ops import cascaded_union
 from dotenv import load_dotenv
 
 INPUT_PATH_DEFAULT = "./assets/Berlin.shp"
@@ -14,7 +14,7 @@ input_buffer = os.getenv("INPUT_SHAPEFILE_BUFFER", INPUT_BUFFER_DEFAULT)
 
 input = geopandas.read_file(input_path)
 input = input.to_crs("epsg:3857")
-input_boundary = geopandas.GeoDataFrame(geopandas.GeoSeries(unary_union(input['geometry'])))
+input_boundary = geopandas.GeoDataFrame(geopandas.GeoSeries(cascaded_union(input['geometry'])))
 input_boundary = input_boundary.rename(columns={0:'geometry'}).set_geometry('geometry')
 
 output = input_boundary.buffer(int(input_buffer))
