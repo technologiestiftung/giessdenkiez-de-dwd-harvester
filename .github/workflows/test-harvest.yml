@@ -12,6 +12,8 @@ on:
   workflow_dispatch:
 
 env:
+  INPUT_SHAPEFILE: ./assets/Berlin.shp
+  INPUT_SHAPEFILE_BUFFER: 2000
   PG_SERVER: localhost
   PG_PORT: "54322"
   PG_USER: postgres
