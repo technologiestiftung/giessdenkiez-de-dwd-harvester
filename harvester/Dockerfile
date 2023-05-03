@@ -12,14 +12,15 @@ RUN apt-get update \
   && rm -rf /var/lib/apt/lists/*
 ENV CPLUS_INCLUDE_PATH=/usr/include/gdal
 ENV C_INCLUDE_PATH=/usr/include/gdal
-# RUN pip install GDAL
 
 FROM base as builder
 
 
 # Install pip requirements
 COPY requirements.txt /app/
-RUN cd /app/ && python -m pip install --no-warn-script-location --prefix=/install -r requirements.txt
+RUN python -m pip install --upgrade pip \
+  && cd /app/ && python -m pip install --no-warn-script-location --prefix=/install -r requirements.txt \
+  && python -m pip install --prefix=/install GDAL==2.4.2
 
 FROM base as app
 COPY --from=builder /install /usr/local

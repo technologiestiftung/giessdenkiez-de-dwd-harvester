@@ -29,6 +29,31 @@ env:
   # DATABASE_URL: postgresql://fangorn:ent@localhost:5432/trees?schema=public
 
 jobs:
+  test-prepare:
+    runs-on: ubuntu-latest
+    if: "!contains(github.event.head_commit.message, 'skip ci')"
+    defaults:
+      run:
+        working-directory: harvester
+    steps:
+      - name: Get the source
+        uses: actions/checkout@v3
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.8
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install g++ gdal-bin libgdal-dev libpq-dev -y
+      - name: Install python packages
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install --no-cache-dir GDAL==3.4.0
+          python -m pip install --no-warn-script-location -r requirements.txt
+      - name: Test with pytest
+        run: |
+          pytest
   test-harvest:
     runs-on: ubuntu-latest
     if: "!contains(github.event.head_commit.message, 'skip ci')"
