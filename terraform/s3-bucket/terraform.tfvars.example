@@ -1,0 +1,5 @@
+# rename me to terraform.tfvars
+profile         = "you"
+region          = "eu-central-1"
+env             = "dev"
+allowed_origins = [""]
