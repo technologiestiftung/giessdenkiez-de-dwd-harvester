@@ -1,6 +1,9 @@
 ![](https://img.shields.io/badge/Built%20with%20%E2%9D%A4%EF%B8%8F-at%20Technologiestiftung%20Berlin-blue)
+
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+
 [![All Contributors](https://img.shields.io/badge/all_contributors-6-orange.svg?style=flat-square)](#contributors-)
+
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 # giessdenkiez-de-dwd-harvester
@@ -43,13 +46,17 @@ For mac we can use `brew install gdal`.
 
 The current python binding of gdal is fixed to GDAL==2.4.2. If you get another gdal (`ogrinfo --version`), make sure to upgrade to your version: `pip install GDAL==VERSION_FROM_PREVIOUS_COMMAND`
 
+### Add a geometry (shapefile) for your region
+
+In order to run, this project needs a shapefile for the region you would like to cover. The default region is the City of Berlin, for which a shapefile is included in the repository. You can add your own shapefile to `harvester/assets/`.
+
 ### Configuration
 
-Copy the `sample.env` file and rename to `.env` then update the parameters, most importantly the database connection parameters.
+Copy the `sample.env` file and rename to `.env` then update the parameters, most importantly the database connection parameters and the path to your shapefile.
 
 ## Running
 
-`harvester/prepare.py` shows how the assets/buffer.shp was created. If a bigger buffer is needed change `line 10` accordingly and re-run.
+`harvester/prepare.py` shows how the assets/buffer.shp was created. If a bigger buffer is needed, change the `INPUT_SHAPEFILE_BUFFER` parameter accordingly and re-run.
 
 `harvester/harvester.py` is the actual file for harvesting the data. Simply run, no command line parameters, all settings are in `.env`.
 

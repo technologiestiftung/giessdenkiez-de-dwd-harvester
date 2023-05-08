@@ -1,16 +1,26 @@
 # building a buffer shape for filtering the weather data
+import os
 import geopandas
 from shapely.ops import cascaded_union
+from dotenv import load_dotenv
 
-berlin = geopandas.read_file("./assets/Berlin.shp")
-berlin = berlin.to_crs("epsg:3857")
-berlin_boundary = geopandas.GeoDataFrame(geopandas.GeoSeries(cascaded_union(berlin['geometry'])))
-berlin_boundary = berlin_boundary.rename(columns={0:'geometry'}).set_geometry('geometry')
+INPUT_PATH_DEFAULT = "./assets/Berlin.shp"
+INPUT_BUFFER_DEFAULT = 2000
 
-berlin_buffer = berlin_boundary.buffer(2000)
-berlin_buffer = berlin_buffer.simplify(1000)
+load_dotenv()
 
-berlin_buffer = geopandas.GeoDataFrame(berlin_buffer)
-berlin_buffer = berlin_buffer.rename(columns={0:'geometry'}).set_geometry('geometry')
-berlin_buffer.crs = "epsg:3857"
-berlin_buffer.to_file("./assets/buffer.shp")
+input_path = os.getenv("INPUT_SHAPEFILE", INPUT_PATH_DEFAULT)
+input_buffer = os.getenv("INPUT_SHAPEFILE_BUFFER", INPUT_BUFFER_DEFAULT)
+
+input = geopandas.read_file(input_path)
+input = input.to_crs("epsg:3857")
+input_boundary = geopandas.GeoDataFrame(geopandas.GeoSeries(cascaded_union(input['geometry'])))
+input_boundary = input_boundary.rename(columns={0:'geometry'}).set_geometry('geometry')
+
+output = input_boundary.buffer(int(input_buffer))
+output = output.simplify(1000)
+
+output = geopandas.GeoDataFrame(output)
+output = output.rename(columns={0:'geometry'}).set_geometry('geometry')
+output.crs = "epsg:3857"
+output.to_file("./assets/buffer.shp")
