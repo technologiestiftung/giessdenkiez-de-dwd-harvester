@@ -66,6 +66,17 @@
         "code",
         "bug"
       ]
+    },
+    {
+      "login": "sjockers",
+      "name": "Simon Jockers",
+      "avatar_url": "https://avatars.githubusercontent.com/u/449739?v=4",
+      "profile": "https://simonjockers.de",
+      "contributions": [
+        "infra",
+        "code",
+        "bug"
+      ]
     }
   ],
   "contributorsPerLine": 7
