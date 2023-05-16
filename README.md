@@ -51,6 +51,8 @@ Copy the `sample.env` file and rename to `.env` then update the parameters, most
 
 `harvester/prepare.py` shows how the assets/buffer.shp was created. If a bigger buffer is needed change `line 10` accordingly and re-run.
 
+`harvester/grid/grid.py` can be used to populate the radolan_geometry table. This table contains vector data for the target city. The data is needed by the harvest process to find the rain data for the target city area.
+
 `harvester/harvester.py` is the actual file for harvesting the data. Simply run, no command line parameters, all settings are in `.env`.
 
 The code in `harvester/harvester.py` tries to clean up after running the code. But, when running this in a container, as the script is completely stand alone, its probably best to just destroy the whole thing and start from scratch next time.
