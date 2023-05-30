@@ -2,7 +2,7 @@
 
 Input:
     buffer.shp: Shapefile containing the outline of the area of interest as a polygon
-    grid.asc: An example raster file conatining precipitation data for whole Germany
+    grid-germany.asc: An example raster file conatining precipitation data for whole Germany
 """
 
 import sys
@@ -58,19 +58,20 @@ except:
     conn = None
 
 # we need to give each grid cell a unique value, otherwise gdal_polygonize will combine cells with equal values
-asc_data = numpy.loadtxt(temp + "/grid.asc", skiprows=6)
+base_grid_file = "grid-germany.asc"
+asc_data = numpy.loadtxt(base_grid_file, skiprows=6)
 col_value = 1
 for r_idx, row in enumerate(asc_data):
     for c_idx, col in enumerate(row):
         asc_data[r_idx][c_idx] = col_value
         col_value += 1
 
-header = linecache.getline(temp + "/grid.asc", 1) + \
-    linecache.getline(temp + "/grid.asc", 2) + \
-    linecache.getline(temp + "/grid.asc", 3) + \
-    linecache.getline(temp + "/grid.asc", 4) + \
-    linecache.getline(temp + "/grid.asc", 5) + \
-    linecache.getline(temp + "/grid.asc", 6)
+header = linecache.getline(base_grid_file, 1) + \
+    linecache.getline(base_grid_file, 2) + \
+    linecache.getline(base_grid_file, 3) + \
+    linecache.getline(base_grid_file, 4) + \
+    linecache.getline(base_grid_file, 5) + \
+    linecache.getline(base_grid_file, 6)
 
 numpy.savetxt(temp + "/grid-transform.asc", asc_data,
               header=header.rstrip(), comments='', fmt='%i')
