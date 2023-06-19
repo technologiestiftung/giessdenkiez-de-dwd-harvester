@@ -5,9 +5,9 @@
 
 # giessdenkiez-de-dwd-harvester
 
-- Gather precipitation data from DWD's radolan data set, for the region of Berlin and connect to the giessdenkiez.de postgres DB (AWS RDS)
+- Gather precipitation data from DWD's radolan data set, for the region of Berlin and connect to the giessdenkiez.de postgres DB
 - Uploads trees combined with weather data to Mapbox and uses its API to create vector tiles for use on mobile devices
-- Generates CSV and GeoJSON files that contain trees locations and weather data (grid) and uploads them to a AWS S3
+- Generates CSV and GeoJSON files that contain trees locations and weather data (grid) and uploads them to a Supabase Storage bucket
 
 ## Pre-Install
 
@@ -64,7 +64,7 @@ The code in `harvester/harvester.py` tries to clean up after running the code. B
 
 ## Docker
 
-To have a local database for testing you need Docker and docker-compose installed. You will also have to create a public S3 Bucket. You also need to update the `.env` file with the values from `sample.env` below the line `# for your docker environment`.
+To have a local database for testing you need Docker and docker-compose installed. You will also have to create a public Supabase Storage bucket. You also need to update the `.env` file with the values from `sample.env` below the line `# for your docker environment`.
 
 to start only the database run
 
