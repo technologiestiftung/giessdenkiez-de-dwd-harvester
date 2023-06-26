@@ -18,7 +18,7 @@ services:
       # PG_PASS: ent
       # SUPABASE_PROJECT_ID=
       # SUPABASE_ACCESS_TOKEN=
-      # SUPABASE_BUCKET_NAME=weather_data
+      # SUPABASE_BUCKET_NAME=data_assets
       # bygiessdenkiez-devoverwriting these here we make sure
       # we dont push all the time to mapbox 💵
       MAPBOXUSERNAME: "123"
