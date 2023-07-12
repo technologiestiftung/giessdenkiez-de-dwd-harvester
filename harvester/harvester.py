@@ -39,7 +39,7 @@ else:
 load_dotenv()
 
 # check if all required environmental variables are accessible
-for env_var in ["PG_DB", "PG_PORT", "PG_USER", "PG_PASS", "SUPABASE_PROJECT_ID", "SUPABASE_BUCKET_NAME", "SUPABASE_ACCESS_TOKEN"]:
+for env_var in ["PG_DB", "PG_PORT", "PG_USER", "PG_PASS", "SUPABASE_URL", "SUPABASE_BUCKET_NAME", "SUPABASE_ACCESS_TOKEN"]:
     if env_var not in os.environ:
         logging.error(
             "❌Environmental Variable {} does not exist".format(env_var))
@@ -58,7 +58,7 @@ logging.info("🆙 Starting harvester v0.5")
 # get last day of insert
 last_date = None
 
-SUPABASE_PROJECT_ID = os.getenv('SUPABASE_PROJECT_ID')
+SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_BUCKET_NAME = os.getenv('SUPABASE_BUCKET_NAME')
 SUPABASE_ACCESS_TOKEN = os.getenv('SUPABASE_ACCESS_TOKEN')
 
@@ -305,14 +305,14 @@ if len(filelist) > 0:
             cell[1], cell[0], sum(clean[cellindex])))
 
     def check_file_exists_in_supabase_storage(file_name):
-        url = f'https://{SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/info/public/{SUPABASE_BUCKET_NAME}/{file_name}'
+        url = f'${SUPABASE_URL}/storage/v1/object/info/public/{SUPABASE_BUCKET_NAME}/{file_name}'
         response = requests.get(url)
         return response.status_code == 200
 
     def upload_file_to_supabase_storage(file_path, file_name):
         try:
             file = open(file_path, 'rb')
-            file_url = f'https://{SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/{SUPABASE_BUCKET_NAME}/{file_name}'
+            file_url = f'${SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET_NAME}/{file_name}'
             r = requests.put if check_file_exists_in_supabase_storage(file_name) else requests.post
             response = r(
                 file_url,
