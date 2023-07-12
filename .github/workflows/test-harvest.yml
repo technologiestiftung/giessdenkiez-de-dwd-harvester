@@ -17,9 +17,8 @@ env:
   PG_USER: postgres
   PG_PASS: postgres
   PG_DB: postgres
-  AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID_TEST }}
-  AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY_TEST }}
-  S3_BUCKET: ${{ secrets.AWS_S3_BUCKET_TEST }}
+  SUPABASE_URL: http://localhost:54321
+  SUPABASE_BUCKET_NAME: data_assets
   OUTPUT: "True"
   MAPBOXUSERNAME: "123"
   MAPBOXTOKEN: "456"
@@ -58,9 +57,10 @@ jobs:
       - name: build the harvester
         run: cd harvester && docker build --tag technologiestiftung/giessdenkiez-de-dwd-harvester:test .
       - name: Start the api
-        run: cd api && supabase start && cd ..
+        id: api-start
+        run: cd api && supabase start | grep -w "service_role key" | cut -d ":" -f 2 | xargs |  tr -d '\n' | awk '{print "service_role_key="$1}' >> "$GITHUB_OUTPUT" && cd ..
       - name: run the harvester
-        run: docker run --env PG_SERVER='0.0.0.0' --env PG_DB --env PG_PORT --env PG_USER --env PG_PASS --env AWS_SECRET_ACCESS_KEY --env AWS_ACCESS_KEY_ID --env S3_BUCKET --env MAPBOXTOKEN --env MAPBOXUSERNAME --env LOGGING --env OUTPUT --network host technologiestiftung/giessdenkiez-de-dwd-harvester:test
+        run: docker run --env PG_SERVER='0.0.0.0' --env PG_DB --env PG_PORT --env PG_USER --env PG_PASS --env SUPABASE_URL --env SUPABASE_ACCESS_TOKEN='${{ steps.api-start.outputs.service_role_key }}' --env SUPABASE_BUCKET_NAME --env MAPBOXTOKEN --env MAPBOXUSERNAME --env LOGGING --env OUTPUT --network host technologiestiftung/giessdenkiez-de-dwd-harvester:test
       - name: stop the api
         run: cd api && supabase stop && cd ..
   release:
