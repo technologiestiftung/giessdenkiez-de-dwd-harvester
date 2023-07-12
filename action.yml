@@ -17,13 +17,13 @@ inputs:
   PG_DB:
     required: true
     description: "The name of the PostgreSQL database"
-  AWS_ACCESS_KEY_ID:
+  SUPABASE_PROJECT_ID:
     required: true
     description: ""
-  AWS_SECRET_ACCESS_KEY:
+  SUPABASE_ACCESS_TOKEN:
     required: true
     description: ""
-  S3_BUCKET:
+  SUPABASE_BUCKET_NAME:
     description: ""
     required: true
   OUTPUT:
@@ -55,9 +55,9 @@ runs:
     PG_USER: ${{ inputs.PG_USER }}
     PG_PASS: ${{ inputs.PG_PASS }}
     PG_DB: ${{ inputs.PG_DB }}
-    AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
-    AWS_SECRET_ACCESS_KEY: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
-    S3_BUCKET: ${{ inputs.S3_BUCKET }}
+    SUPABASE_PROJECT_ID: ${{ inputs.SUPABASE_PROJECT_ID }}
+    SUPABASE_ACCESS_TOKEN: ${{ inputs.SUPABASE_ACCESS_TOKEN }}
+    SUPABASE_BUCKET_NAME: ${{ inputs.SUPABASE_BUCKET_NAME }}
     MAPBOXUSERNAME: ${{ inputs.MAPBOXUSERNAME }}
     MAPBOXTOKEN: ${{ inputs.MAPBOXTOKEN }}
     MAPBOXTILESET: ${{ inputs.MAPBOXTILESET }}

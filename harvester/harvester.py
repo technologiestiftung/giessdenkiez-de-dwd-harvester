@@ -39,7 +39,7 @@ else:
 load_dotenv()
 
 # check if all required environmental variables are accessible
-for env_var in ["PG_DB", "PG_PORT", "PG_USER", "PG_PASS", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "S3_BUCKET"]:
+for env_var in ["PG_DB", "PG_PORT", "PG_USER", "PG_PASS", "SUPABASE_PROJECT_ID", "SUPABASE_BUCKET_NAME", "SUPABASE_ACCESS_TOKEN"]:
     if env_var not in os.environ:
         logging.error(
             "❌Environmental Variable {} does not exist".format(env_var))
@@ -57,6 +57,10 @@ dsn = f"host='{pg_server}' port={pg_port} user='{pg_username}' password='{pg_pas
 logging.info("🆙 Starting harvester v0.5")
 # get last day of insert
 last_date = None
+
+SUPABASE_PROJECT_ID = os.getenv('SUPABASE_PROJECT_ID')
+SUPABASE_BUCKET_NAME = os.getenv('SUPABASE_BUCKET_NAME')
+SUPABASE_ACCESS_TOKEN = os.getenv('SUPABASE_ACCESS_TOKEN')
 
 try:
     conn = psycopg2.connect(dsn)
@@ -287,10 +291,8 @@ if len(filelist) > 0:
 
     values = None
 
-    # generate gejson for map and upload to S3
+    # generate geojson for map and upload to Supabase Storage
     logging.info("generate geojson 🗺️")
-    s3 = boto3.client('s3', aws_access_key_id=os.getenv(
-        "AWS_ACCESS_KEY_ID"), aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"))
 
     features = []
     features_light = []
@@ -302,6 +304,34 @@ if len(filelist) > 0:
         features_light.append(feature_template.format(
             cell[1], cell[0], sum(clean[cellindex])))
 
+    def check_file_exists_in_supabase_storage(file_name):
+        url = f'https://{SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/info/public/{SUPABASE_BUCKET_NAME}/{file_name}'
+        response = requests.get(url)
+        return response.status_code == 200
+
+    def upload_file_to_supabase_storage(file_path, file_name):
+        try:
+            file = open(file_path, 'rb')
+            file_url = f'https://{SUPABASE_PROJECT_ID}.supabase.co/storage/v1/object/{SUPABASE_BUCKET_NAME}/{file_name}'
+            r = requests.put if check_file_exists_in_supabase_storage(file_name) else requests.post
+            response = r(
+                file_url,
+                files={'file': file}, 
+                headers={
+                    'Authorization': f'Bearer {SUPABASE_ACCESS_TOKEN}',
+                    'ContentType': 'application/geo+json',
+                    'AcceptEncoding': 'gzip, deflate, br'
+                },
+            )
+
+            if response.status_code == 200:
+                logging.info("✅ Uploaded {} to supabase storage".format(file_name))
+            else:
+                logging.warning("❌ Could not upload {} to supabase storage".format(file_name))
+            
+        except:
+            logging.warning("❌ Could not upload {} supabase storage".format(file_name))
+
     def finishGeojson(feature_list, file_name):
         geojson = '{{"type":"FeatureCollection","properties":{{"start":"{}","end":"{}"}},"features":[{}]}}'.format(
             startdate, enddate, ",".join(feature_list))
@@ -311,16 +341,7 @@ if len(filelist) > 0:
         text_file.close()
         n = None
 
-        s3.upload_file(path + file_name, os.getenv("S3_BUCKET"), file_name)
-
-        # add an additional gzip version
-        geojson_file = open(path + file_name, "rb")
-        geojson_data = geojson_file.read()
-        geojson_bindata = bytearray(geojson_data)
-        with gzip.open(path + file_name + ".gz", "wb") as f:
-            f.write(geojson_bindata)
-        s3.upload_file(path + file_name + ".gz", os.getenv("S3_BUCKET"), file_name + ".gz",
-                       ExtraArgs={'ContentType': 'application/json', 'ContentEncoding': 'gzip'})
+        upload_file_to_supabase_storage(path + file_name, file_name)
 
     finishGeojson(features, "weather.geojson")
     finishGeojson(features_light, "weather_light.geojson")
@@ -368,21 +389,10 @@ if len(filelist) > 0:
         text_file.close()
         n = None
 
-        s3.upload_file(path + "trees.csv", os.getenv("S3_BUCKET"), "trees.csv")
-        csv_data = bytes(trees_csv, "utf-8")
-        with gzip.open(path + "trees.csv.gz", "wb") as f:
-            f.write(csv_data)
-        s3.upload_file(path + "trees.csv.gz", os.getenv("S3_BUCKET"), "trees.csv.gz",
-                       ExtraArgs={'ContentType': 'text/csv', 'ContentEncoding': 'gzip'})
+        upload_file_to_supabase_storage(path + "trees.csv", "trees.csv")
 
         for i in range(4):
-            s3.upload_file(path + "trees-p{}.csv".format(i + 1),
-                           os.getenv("S3_BUCKET"), "trees-p{}.csv".format(i + 1))
-            csv_data = bytes(singleCSVs[i], "utf-8")
-            with gzip.open(path + "trees-p{}.csv.gz".format(i + 1), "wb") as f:
-                f.write(csv_data)
-            s3.upload_file(path + "trees-p{}.csv.gz".format(i + 1), os.getenv("S3_BUCKET"),
-                           "trees-p{}.csv.gz".format(i + 1), ExtraArgs={'ContentType': 'text/csv', 'ContentEncoding': 'gzip'})
+            upload_file_to_supabase_storage(path + "trees-p{}.csv".format(i + 1), "trees-p{}.csv".format(i + 1))
 
         # send the updated csv to mapbox
 
