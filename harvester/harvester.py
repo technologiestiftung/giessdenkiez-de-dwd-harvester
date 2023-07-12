@@ -305,14 +305,14 @@ if len(filelist) > 0:
             cell[1], cell[0], sum(clean[cellindex])))
 
     def check_file_exists_in_supabase_storage(file_name):
-        url = f'${SUPABASE_URL}/storage/v1/object/info/public/{SUPABASE_BUCKET_NAME}/{file_name}'
+        url = f'{SUPABASE_URL}/storage/v1/object/info/public/{SUPABASE_BUCKET_NAME}/{file_name}'
         response = requests.get(url)
         return response.status_code == 200
 
     def upload_file_to_supabase_storage(file_path, file_name):
         try:
             file = open(file_path, 'rb')
-            file_url = f'${SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET_NAME}/{file_name}'
+            file_url = f'{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET_NAME}/{file_name}'
             r = requests.put if check_file_exists_in_supabase_storage(file_name) else requests.post
             response = r(
                 file_url,
