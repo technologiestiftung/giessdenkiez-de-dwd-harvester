@@ -17,7 +17,7 @@ inputs:
   PG_DB:
     required: true
     description: "The name of the PostgreSQL database"
-  SUPABASE_PROJECT_ID:
+  SUPABASE_URL:
     required: true
     description: ""
   SUPABASE_ACCESS_TOKEN:
@@ -55,7 +55,7 @@ runs:
     PG_USER: ${{ inputs.PG_USER }}
     PG_PASS: ${{ inputs.PG_PASS }}
     PG_DB: ${{ inputs.PG_DB }}
-    SUPABASE_PROJECT_ID: ${{ inputs.SUPABASE_PROJECT_ID }}
+    SUPABASE_URL: ${{ inputs.SUPABASE_URL }}
     SUPABASE_ACCESS_TOKEN: ${{ inputs.SUPABASE_ACCESS_TOKEN }}
     SUPABASE_BUCKET_NAME: ${{ inputs.SUPABASE_BUCKET_NAME }}
     MAPBOXUSERNAME: ${{ inputs.MAPBOXUSERNAME }}

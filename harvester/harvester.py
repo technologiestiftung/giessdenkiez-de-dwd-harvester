@@ -327,9 +327,12 @@ if len(filelist) > 0:
             if response.status_code == 200:
                 logging.info("✅ Uploaded {} to supabase storage".format(file_name))
             else:
+                logging.warning(response.status_code)
+                logging.warning(response.content)
                 logging.warning("❌ Could not upload {} to supabase storage".format(file_name))
             
-        except:
+        except Exception as error:
+            logging.warning(error)
             logging.warning("❌ Could not upload {} supabase storage".format(file_name))
 
     def finishGeojson(feature_list, file_name):
