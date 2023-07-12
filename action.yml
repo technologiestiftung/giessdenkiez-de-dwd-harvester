@@ -17,14 +17,14 @@ inputs:
   PG_DB:
     required: true
     description: "The name of the PostgreSQL database"
-  AWS_ACCESS_KEY_ID:
+  SUPABASE_URL:
     required: true
-    description: ""
-  AWS_SECRET_ACCESS_KEY:
+    description: "The base URL to Supabase, e.g. http://localhost:54321 for a local Supabase"
+  SUPABASE_ACCESS_TOKEN:
     required: true
-    description: ""
-  S3_BUCKET:
-    description: ""
+    description: "The access token for accessing the Supabase bucket"
+  SUPABASE_BUCKET_NAME:
+    description: "The bucket name where the harvested data should be pushed to"
     required: true
   OUTPUT:
     description: ""
@@ -55,9 +55,9 @@ runs:
     PG_USER: ${{ inputs.PG_USER }}
     PG_PASS: ${{ inputs.PG_PASS }}
     PG_DB: ${{ inputs.PG_DB }}
-    AWS_ACCESS_KEY_ID: ${{ inputs.AWS_ACCESS_KEY_ID }}
-    AWS_SECRET_ACCESS_KEY: ${{ inputs.AWS_SECRET_ACCESS_KEY }}
-    S3_BUCKET: ${{ inputs.S3_BUCKET }}
+    SUPABASE_URL: ${{ inputs.SUPABASE_URL }}
+    SUPABASE_ACCESS_TOKEN: ${{ inputs.SUPABASE_ACCESS_TOKEN }}
+    SUPABASE_BUCKET_NAME: ${{ inputs.SUPABASE_BUCKET_NAME }}
     MAPBOXUSERNAME: ${{ inputs.MAPBOXUSERNAME }}
     MAPBOXTOKEN: ${{ inputs.MAPBOXTOKEN }}
     MAPBOXTILESET: ${{ inputs.MAPBOXTILESET }}

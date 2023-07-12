@@ -197,6 +197,7 @@ override.tf.json
 # example: *tfplan*
 terraform/rds/terraform.tfvars
 terraform/ecs-harvester/terraform.tfvars
+terraform/s3-bucket/terraform.tfvars
 terraform/.vscode/settings.json
 # Logs
 logs
