@@ -77,6 +77,16 @@
         "code",
         "bug"
       ]
+    },
+    {
+      "login": "Jaszkowic",
+      "name": "Jonas Jaszkowic",
+      "avatar_url": "https://avatars.githubusercontent.com/u/10830180?v=4",
+      "profile": "https://github.com/Jaszkowic",
+      "contributions": [
+        "code",
+        "infra"
+      ]
     }
   ],
   "contributorsPerLine": 7
