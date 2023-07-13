@@ -17,7 +17,7 @@ services:
       # PG_USER: fangorn
       # PG_PASS: ent
       # SUPABASE_PROJECT_ID=
-      # SUPABASE_ACCESS_TOKEN=
+      # SUPABASE_SERVICE_ROLE_KEY=
       # SUPABASE_BUCKET_NAME=data_assets
       # bygiessdenkiez-devoverwriting these here we make sure
       # we dont push all the time to mapbox 💵
@@ -31,7 +31,7 @@ services:
     # By overtwriting the command we can start the container
     # move into it (docker exec -it {CONTAINER ID} /bin/sh
     # and execute or debug all the scripts manually
-    command: ["tail", "-f", "/dev/null"]
+    command: [ "tail", "-f", "/dev/null" ]
 
   postgres:
     container_name: "postgres"
