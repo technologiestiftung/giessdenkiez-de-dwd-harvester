@@ -39,7 +39,7 @@ else:
 load_dotenv()
 
 # check if all required environmental variables are accessible
-for env_var in ["PG_DB", "PG_PORT", "PG_USER", "PG_PASS", "SUPABASE_URL", "SUPABASE_BUCKET_NAME", "SUPABASE_ACCESS_TOKEN"]:
+for env_var in ["PG_DB", "PG_PORT", "PG_USER", "PG_PASS", "SUPABASE_URL", "SUPABASE_BUCKET_NAME", "SUPABASE_SERVICE_ROLE_KEY"]:
     if env_var not in os.environ:
         logging.error(
             "❌Environmental Variable {} does not exist".format(env_var))
@@ -60,7 +60,7 @@ last_date = None
 
 SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_BUCKET_NAME = os.getenv('SUPABASE_BUCKET_NAME')
-SUPABASE_ACCESS_TOKEN = os.getenv('SUPABASE_ACCESS_TOKEN')
+SUPABASE_SERVICE_ROLE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
 
 try:
     conn = psycopg2.connect(dsn)
@@ -316,9 +316,9 @@ if len(filelist) > 0:
             r = requests.put if check_file_exists_in_supabase_storage(file_name) else requests.post
             response = r(
                 file_url,
-                files={'file': file}, 
+                files={'file': file},
                 headers={
-                    'Authorization': f'Bearer {SUPABASE_ACCESS_TOKEN}',
+                    'Authorization': f'Bearer {SUPABASE_SERVICE_ROLE_KEY}',
                     'ContentType': 'application/geo+json',
                     'AcceptEncoding': 'gzip, deflate, br'
                 },
@@ -330,7 +330,7 @@ if len(filelist) > 0:
                 logging.warning(response.status_code)
                 logging.warning(response.content)
                 logging.warning("❌ Could not upload {} to supabase storage".format(file_name))
-            
+
         except Exception as error:
             logging.warning(error)
             logging.warning("❌ Could not upload {} supabase storage".format(file_name))
