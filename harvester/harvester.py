@@ -62,6 +62,7 @@ SUPABASE_URL = os.getenv('SUPABASE_URL')
 SUPABASE_BUCKET_NAME = os.getenv('SUPABASE_BUCKET_NAME')
 SUPABASE_SERVICE_ROLE_KEY = os.getenv('SUPABASE_SERVICE_ROLE_KEY')
 
+
 try:
     conn = psycopg2.connect(dsn)
     logging.info("🗄 Database connection established")
@@ -330,7 +331,7 @@ if len(filelist) > 0:
                 logging.warning(response.status_code)
                 logging.warning(response.content)
                 logging.warning("❌ Could not upload {} to supabase storage".format(file_name))
-
+                
         except Exception as error:
             logging.warning(error)
             logging.warning("❌ Could not upload {} supabase storage".format(file_name))
