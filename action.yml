@@ -20,9 +20,9 @@ inputs:
   SUPABASE_URL:
     required: true
     description: "The base URL to Supabase, e.g. http://localhost:54321 for a local Supabase"
-  SUPABASE_ACCESS_TOKEN:
+  SUPABASE_SERVICE_ROLE_KEY:
     required: true
-    description: "The access token for accessing the Supabase bucket"
+    description: "The service role key for accessing the Supabase bucket"
   SUPABASE_BUCKET_NAME:
     description: "The bucket name where the harvested data should be pushed to"
     required: true
@@ -56,7 +56,7 @@ runs:
     PG_PASS: ${{ inputs.PG_PASS }}
     PG_DB: ${{ inputs.PG_DB }}
     SUPABASE_URL: ${{ inputs.SUPABASE_URL }}
-    SUPABASE_ACCESS_TOKEN: ${{ inputs.SUPABASE_ACCESS_TOKEN }}
+    SUPABASE_SERVICE_ROLE_KEY: ${{ inputs.SUPABASE_SERVICE_ROLE_KEY }}
     SUPABASE_BUCKET_NAME: ${{ inputs.SUPABASE_BUCKET_NAME }}
     MAPBOXUSERNAME: ${{ inputs.MAPBOXUSERNAME }}
     MAPBOXTOKEN: ${{ inputs.MAPBOXTOKEN }}
