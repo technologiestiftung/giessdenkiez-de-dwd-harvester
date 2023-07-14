@@ -96,28 +96,6 @@ docker-compose up --build
 
 ```
 
-## Terraform
-
-Terrafrom is used to create the needed S3 Bucket, the Postres RDS and the Fargate container service. [Install and configure Terraform](https://learn.hashicorp.com/terraform?track=getting-started#getting-started). Update `terraform.tfvars` with your profile and region.
-
-Run:
-
-```bash
-# once
-# cd into the directories
-# create them in this order
-# 1. s3-bucket
-# 2. rds
-# 3. ecs-harvester
-# the last setup needs some variables from you
-# - vpc
-# - public subnet ids
-# - profile
-# - and all the env variables for the container
-terraform init
-# and after changes
-terraform apply
-```
 
 ## Contributors ✨
 
