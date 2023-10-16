@@ -4,11 +4,13 @@ import psycopg2.extras
 import psycopg2
 import logging
 import os
-import math
 import boto3
 import requests
 import json
 import tempfile
+import time
+from tqdm import tqdm
+import subprocess
 
 logging.root.setLevel(logging.INFO)
 
@@ -84,25 +86,28 @@ with conn.cursor() as cur:
         "SELECT trees.id, trees.lat, trees.lng, trees.radolan_sum, trees.pflanzjahr FROM trees WHERE ST_CONTAINS(ST_SetSRID (( SELECT ST_EXTENT (geometry) FROM radolan_geometry), 4326), trees.geom)"
     )
     trees = cur.fetchall()
-    trees_head = "id,lng,lat,radolan_sum,age"
-    trees_csv = trees_head
-    pLimit = math.ceil(len(trees) / 4)
+    header = "id,lng,lat,radolan_sum,age"
+    
     logging.info(f"Creating trees.csv file for {len(trees)} trees")
-    for tree in trees:
-        newLine = "\n"
-        newLine += "{},{},{},{}".format(tree[0], tree[1], tree[2], tree[3])
-        if tree[4] == 0:  # Invalid "pflanzjahr" column is reported as 0
-            newLine += ","
-        else:
-            newLine += ",{}".format(int(current_year) - int(tree[4]))
-        trees_csv += newLine
-        
-    text_file = open(path + "trees.csv", "w")
-    n = text_file.write(trees_csv)
-    text_file.close()
-    n = None
+    lines = []
+    for tree in tqdm(trees):
+        age = int(current_year) - int(tree[4]) if tree[4] != 0 else ''
+        line = "{},{},{},{},{}".format(tree[0], tree[1], tree[2], tree[3], age)
+        lines.append(line)
+    
+    trees_csv = "\n".join([header] + lines)
+       
+    with open(path + "trees.csv", 'w') as out:
+        out.write(trees_csv)
 
-    upload_file_to_supabase_storage(path + "trees.csv", "trees.csv")
+    # Pre-process trees.csv with tippecanoe
+    trees_csv_full_path = path + "trees.csv"
+    trees_preprocessed_full_path = path + "trees-preprocessed.mbtiles"
+    logging.info("Preprocess trees.csv with tippecanoe...")
+    subprocess.call(["tippecanoe", "-zg", "-o", trees_preprocessed_full_path, "--force", "--drop-fraction-as-needed", trees_csv_full_path])
+    logging.info("Preprocess trees.csv with tippecanoe... Done.")
+    
+    upload_file_to_supabase_storage(trees_preprocessed_full_path, "trees-preprocessed.mbtiles")
 
     # send the updated csv to mapbox
     # get upload credentials
@@ -112,7 +117,7 @@ with conn.cursor() as cur:
         )
         response = requests.post(url)
         s3_credentials = json.loads(response.content)
-
+        
         # upload latest data
         s3mapbox = boto3.client(
             "s3",
@@ -121,7 +126,7 @@ with conn.cursor() as cur:
             aws_session_token=s3_credentials["sessionToken"],
         )
         s3mapbox.upload_file(
-            path + "trees.csv", s3_credentials["bucket"], s3_credentials["key"]
+            trees_preprocessed_full_path, s3_credentials["bucket"], s3_credentials["key"]
         )
 
         # tell mapbox that new data has arrived
@@ -141,9 +146,37 @@ with conn.cursor() as cur:
             "Cache-Control": "no-cache",
         }
         response = requests.post(url, data=payload, headers=headers)
-
-        # TODO: Check response status codes
-        # TODO: Check upload status until error or complete
+        if(response.status_code != 201):
+            logging.error("could not generate Mapbox upload")
+            logging.error(response.content)
+        
+        upload_id = json.loads(response.content)['id']
+        logging.info(f"Initialized generation of Mapbox tilesets for upload={upload_id}...")
+        
+        # Check for status of Mapbox upload until completed or error
+        
+        complete=False
+        error=None
+        while (complete==False and error is None):
+            url = "https://api.mapbox.com/uploads/v1/{}/{}?access_token={}".format(
+                os.getenv("MAPBOXUSERNAME"), upload_id, os.getenv("MAPBOXTOKEN")
+            )
+            headers = {
+                "content-type": "application/json",
+                "Accept-Charset": "UTF-8",
+                "Cache-Control": "no-cache",
+            }
+            response = requests.get(url, headers=headers)
+            responseJson = json.loads(response.content)
+            complete = responseJson['complete']
+            error = responseJson['error']
+            progress = responseJson['progress']
+            logging.info(f"Waiting for tileset generation for upload={upload_id} progress={progress} complete={complete} error={error}")
+            time.sleep(2)
+        
+        if error is not None:
+            logging.error(error)
+            exit(1)
 
     except Exception as error:
         logging.error("could not upload tree data to mapbox for vector tiles")
