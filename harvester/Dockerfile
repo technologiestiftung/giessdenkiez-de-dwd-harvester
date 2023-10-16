@@ -24,7 +24,7 @@ RUN cd /app/ && python -m pip install --no-warn-script-location --prefix=/instal
 FROM base as app
 COPY --from=builder /install /usr/local
 
-RUN apt-get -y install git
+RUN apt-get update && apt-get -y install git
 RUN git clone https://github.com/mapbox/tippecanoe.git && cd tippecanoe &&  make -j && make install
 
 # COPY harvester.py /app/
