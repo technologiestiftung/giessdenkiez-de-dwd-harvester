@@ -31,4 +31,4 @@ COPY --from=builder /install /usr/local
 COPY . /app/
 
 
-CMD ["python", "/app/harvester.py"]
+CMD python /app/harvester.py && python /app/mapbox-tree-update.py

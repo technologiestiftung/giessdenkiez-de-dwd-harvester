@@ -12,12 +12,6 @@ import psycopg2
 from dotenv import load_dotenv
 import logging
 import os
-import sys
-import math
-import boto3
-import requests
-import json
-
 
 # setting up logging
 logging.basicConfig()
@@ -305,37 +299,6 @@ if len(filelist) > 0:
         features_light.append(feature_template.format(
             cell[1], cell[0], sum(clean[cellindex])))
 
-    def check_file_exists_in_supabase_storage(file_name):
-        url = f'{SUPABASE_URL}/storage/v1/object/info/public/{SUPABASE_BUCKET_NAME}/{file_name}'
-        response = requests.get(url)
-        return response.status_code == 200
-
-    def upload_file_to_supabase_storage(file_path, file_name):
-        try:
-            file = open(file_path, 'rb')
-            file_url = f'{SUPABASE_URL}/storage/v1/object/{SUPABASE_BUCKET_NAME}/{file_name}'
-            r = requests.put if check_file_exists_in_supabase_storage(file_name) else requests.post
-            response = r(
-                file_url,
-                files={'file': file},
-                headers={
-                    'Authorization': f'Bearer {SUPABASE_SERVICE_ROLE_KEY}',
-                    'ContentType': 'application/geo+json',
-                    'AcceptEncoding': 'gzip, deflate, br'
-                },
-            )
-
-            if response.status_code == 200:
-                logging.info("✅ Uploaded {} to supabase storage".format(file_name))
-            else:
-                logging.warning(response.status_code)
-                logging.warning(response.content)
-                logging.warning("❌ Could not upload {} to supabase storage".format(file_name))
-                
-        except Exception as error:
-            logging.warning(error)
-            logging.warning("❌ Could not upload {} supabase storage".format(file_name))
-
     def finishGeojson(feature_list, file_name):
         geojson = '{{"type":"FeatureCollection","properties":{{"start":"{}","end":"{}"}},"features":[{}]}}'.format(
             startdate, enddate, ",".join(feature_list))
@@ -345,69 +308,8 @@ if len(filelist) > 0:
         text_file.close()
         n = None
 
-        upload_file_to_supabase_storage(path + file_name, file_name)
-
     finishGeojson(features, "weather.geojson")
     finishGeojson(features_light, "weather_light.geojson")
-
-    current_year = datetime.date.today().strftime("%Y")
-    
-    # create a CSV with all trees (id, lat, lng, radolan_sum, age)
-    with conn.cursor() as cur:
-        # WARNING: The db is still mislabeled lat <> lng
-        cur.execute("SELECT trees.id, trees.lat, trees.lng, trees.radolan_sum, trees.pflanzjahr FROM trees WHERE ST_CONTAINS(ST_SetSRID (( SELECT ST_EXTENT (geometry) FROM radolan_geometry), 4326), trees.geom)")
-        trees = cur.fetchall()
-        trees_head = "id,lng,lat,radolan_sum,age"
-        trees_csv = trees_head
-        pLimit = math.ceil(len(trees) / 4)
-        for tree in trees:
-            newLine = "\n"
-            newLine += "{},{},{},{}".format(tree[0], tree[1], tree[2], tree[3])
-            if tree[4] == 0: # Invalid "pflanzjahr" column is reported as 0
-                newLine += ","
-            else:
-                newLine += ",{}".format(int(current_year) - int(tree[4]))
-
-        text_file = open(path + "trees.csv", "w")
-        n = text_file.write(trees_csv)
-        text_file.close()
-        n = None
-
-        upload_file_to_supabase_storage(path + "trees.csv", "trees.csv")
-
-        # send the updated csv to mapbox
-
-        # get upload credentials
-        try:
-            url = "https://api.mapbox.com/uploads/v1/{}/credentials?access_token={}".format(
-                os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTOKEN"))
-            response = requests.post(url)
-            s3_credentials = json.loads(response.content)
-
-        # upload latest data
-
-            s3mapbox = boto3.client('s3', aws_access_key_id=s3_credentials["accessKeyId"],
-                                    aws_secret_access_key=s3_credentials["secretAccessKey"], aws_session_token=s3_credentials["sessionToken"])
-            s3mapbox.upload_file(path + "trees.csv",
-                                 s3_credentials["bucket"], s3_credentials["key"])
-
-        # tell mapbox that new data has arrived
-
-            url = "https://api.mapbox.com/uploads/v1/{}?access_token={}".format(
-                os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTOKEN"))
-            payload = '{{"url":"http://{}.s3.amazonaws.com/{}","tileset":"{}.{}","name":"{}"}}'.format(
-                s3_credentials["bucket"], s3_credentials["key"], os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTILESET"), os.getenv("MAPBOXLAYERNAME"))
-            headers = {'content-type': 'application/json',
-                       'Accept-Charset': 'UTF-8', 'Cache-Control': 'no-cache'}
-            response = requests.post(url, data=payload, headers=headers)
-            # wohooo!
-            logging.info("✅ Map updated to timespan: {} to {}".format(
-                startdate, enddate))
-        except:
-            logging.warning(
-                "could not upload tree data to mapbox for vector tiles")
-        trees_csv = None
-        csv_data = None
 
     # remove all temporary files
     shutil.rmtree(path)
