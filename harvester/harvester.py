@@ -350,43 +350,23 @@ if len(filelist) > 0:
     finishGeojson(features, "weather.geojson")
     finishGeojson(features_light, "weather_light.geojson")
 
-    # create a CSV with all trees (id, lat, lng, radolan_sum)
+    current_year = datetime.date.today().strftime("%Y")
+    
+    # create a CSV with all trees (id, lat, lng, radolan_sum, age)
     with conn.cursor() as cur:
         # WARNING: The db is still mislabeled lat <> lng
-        cur.execute("SELECT trees.id, trees.lat, trees.lng, trees.radolan_sum, (date_part('year', CURRENT_DATE) - trees.pflanzjahr) as age FROM trees WHERE ST_CONTAINS(ST_SetSRID (( SELECT ST_EXTENT (geometry) FROM radolan_geometry), 4326), trees.geom)")
+        cur.execute("SELECT trees.id, trees.lat, trees.lng, trees.radolan_sum, trees.pflanzjahr FROM trees WHERE ST_CONTAINS(ST_SetSRID (( SELECT ST_EXTENT (geometry) FROM radolan_geometry), 4326), trees.geom)")
         trees = cur.fetchall()
         trees_head = "id,lng,lat,radolan_sum,age"
         trees_csv = trees_head
         pLimit = math.ceil(len(trees) / 4)
-        pCount = 0
-        pfCount = 1
-        singleCSV = trees_head
-        singleCSVs = []
         for tree in trees:
             newLine = "\n"
             newLine += "{},{},{},{}".format(tree[0], tree[1], tree[2], tree[3])
-            if tree[4] is None:
+            if tree[4] == 0: # Invalid "pflanzjahr" column is reported as 0
                 newLine += ","
             else:
-                newLine += ",{}".format(int(tree[4]))
-            singleCSV += newLine
-            trees_csv += newLine
-            pCount += 1
-            if pCount >= pLimit:
-                text_file = open(path + "trees-p{}.csv".format(pfCount), "w")
-                singleCSVs.append(singleCSV)
-                n = text_file.write(singleCSV)
-                text_file.close()
-                n = None
-                pfCount += 1
-                pCount = 0
-                singleCSV = trees_head
-
-        text_file = open(path + "trees-p{}.csv".format(pfCount), "w")
-        singleCSVs.append(singleCSV)
-        n = text_file.write(singleCSV)
-        text_file.close()
-        n = None
+                newLine += ",{}".format(int(current_year) - int(tree[4]))
 
         text_file = open(path + "trees.csv", "w")
         n = text_file.write(trees_csv)
@@ -394,9 +374,6 @@ if len(filelist) > 0:
         n = None
 
         upload_file_to_supabase_storage(path + "trees.csv", "trees.csv")
-
-        for i in range(4):
-            upload_file_to_supabase_storage(path + "trees-p{}.csv".format(i + 1), "trees-p{}.csv".format(i + 1))
 
         # send the updated csv to mapbox
 
