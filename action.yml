@@ -46,6 +46,10 @@ inputs:
     description: ""
     required: true
     default: "INFO"
+  SKIP_MAPBOX:
+    description: "Set to 'True' to skip the Mapbox Tileset generation (for testing pipelines)"
+    required: true
+    default: "False"
 runs:
   using: "docker"
   image: "harvester/Dockerfile"
@@ -64,3 +68,4 @@ runs:
     MAPBOXLAYERNAME: ${{ inputs.MAPBOXLAYERNAME }}
     LOGGING: ${{ inputs.LOGGING }}
     DATABASE_URL: ${{ inputs.DATABASE_URL }}
+    SKIP_MAPBOX: ${{ inputs.SKIP_MAPBOX }}
