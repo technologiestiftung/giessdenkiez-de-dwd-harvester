@@ -159,7 +159,7 @@ if conn is not None:
         # Send the updated CSV to Mapbox
         if SKIP_MAPBOX != "True":
             try:
-                # uploadAndRegenerateLayer(trees_preprocessed_full_path, os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTILESET"), os.getenv("MAPBOXLAYERNAME"))
+                uploadAndRegenerateLayer(trees_preprocessed_full_path, os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTILESET"), os.getenv("MAPBOXLAYERNAME"))
                 uploadAndRegenerateLayer(geojson_processed_full_path, os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOX_CYLINDER_TILESET"), os.getenv("MAPBOX_CYLINDER_LAYERNAME"))
 
             except Exception as error:
