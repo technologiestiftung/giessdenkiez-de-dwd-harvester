@@ -1,17 +1,15 @@
 import os
 import requests
 import json
-import tempfile
 import time
-import shutil
-import subprocess
 import boto3
 from datetime import datetime
-import psycopg2
 import logging
 from tqdm import tqdm
 
 def uploadAndRegenerateLayer(absolute_file_path, mapboxUsername, tilesetId, tilesetLayerName):
+    print(absolute_file_path, mapboxUsername, tilesetId, tilesetLayerName)
+    # return 1
     # Get credentials
     url = "https://api.mapbox.com/uploads/v1/{}/credentials?access_token={}".format(
         os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTOKEN")

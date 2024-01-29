@@ -68,3 +68,5 @@ def generateCylinderGeojson(trees):
         'features': features,
         'type': 'FeatureCollection'
     }
+    
+    return geojson

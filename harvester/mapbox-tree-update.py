@@ -2,16 +2,12 @@ import os
 import requests
 import json
 import tempfile
-import time
 import shutil
 import subprocess
-# import boto3
 from datetime import datetime
 import psycopg2
 import logging
 from tqdm import tqdm
-from typing import NamedTuple
-import math
 from uploadAndRegenerateLayer import uploadAndRegenerateLayer
 from generateCylinderGeojson import generateCylinderGeojson
 
@@ -163,8 +159,8 @@ if conn is not None:
         # Send the updated CSV to Mapbox
         if SKIP_MAPBOX != "True":
             try:
-                uploadAndRegenerateLayer(trees_preprocessed_full_path, os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTILESET"), os.getenv("MAPBOXLAYERNAME"))
-                uploadAndRegenerateLayer(trees_preprocessed_full_path, os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOX_CYLINDER_TILESET"), os.getenv("MAPBOX_CYLINDER_LAYERNAME"))
+                # uploadAndRegenerateLayer(trees_preprocessed_full_path, os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTILESET"), os.getenv("MAPBOXLAYERNAME"))
+                uploadAndRegenerateLayer(geojson_processed_full_path, os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOX_CYLINDER_TILESET"), os.getenv("MAPBOX_CYLINDER_LAYERNAME"))
 
             except Exception as error:
                 logging.error("Could not upload tree data to Mapbox for vector tiles")
