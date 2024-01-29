@@ -89,7 +89,7 @@ if conn is not None:
         logging.info("Fetching trees from the database...")
         # WARNING: The db is still mislabeled lat <> lng
         cur.execute(
-            "SELECT trees.id, trees.lat, trees.lng, trees.radolan_sum, trees.pflanzjahr FROM trees WHERE ST_CONTAINS(ST_SetSRID (( SELECT ST_EXTENT (geometry) FROM radolan_geometry), 4326), trees.geom) limit 5;"
+            "SELECT trees.id, trees.lat, trees.lng, trees.radolan_sum, trees.pflanzjahr FROM trees WHERE ST_CONTAINS(ST_SetSRID (( SELECT ST_EXTENT (geometry) FROM radolan_geometry), 4326), trees.geom);"
         )
         trees = cur.fetchall()
 

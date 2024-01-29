@@ -42,6 +42,12 @@ inputs:
   MAPBOXLAYERNAME:
     description: "The layer within the tileset that holds the trees data"
     required: true
+  MAPBOX_CYLINDER_TILESET:
+    description: "The name of the tree cylinder tileset"
+    required: true
+  MAPBOX_CYLINDER_LAYERNAME:
+    description: "The layer within the tileset that holds the tree cylinder data"
+    required: true
   LOGGING:
     description: ""
     required: true
@@ -66,6 +72,8 @@ runs:
     MAPBOXTOKEN: ${{ inputs.MAPBOXTOKEN }}
     MAPBOXTILESET: ${{ inputs.MAPBOXTILESET }}
     MAPBOXLAYERNAME: ${{ inputs.MAPBOXLAYERNAME }}
+    MAPBOX_CYLINDER_TILESET: ${{ inputs.MAPBOX_CYLINDER_TILESET }}
+    MAPBOX_CYLINDER_LAYERNAME: ${{ inputs.MAPBOX_CYLINDER_LAYERNAME }}
     LOGGING: ${{ inputs.LOGGING }}
     DATABASE_URL: ${{ inputs.DATABASE_URL }}
     SKIP_MAPBOX: ${{ inputs.SKIP_MAPBOX }}
