@@ -2,14 +2,14 @@ import os
 import requests
 import json
 import tempfile
-import time
 import shutil
 import subprocess
-import boto3
 from datetime import datetime
 import psycopg2
 import logging
 from tqdm import tqdm
+from uploadAndRegenerateLayer import uploadAndRegenerateLayer
+from generateCylinderGeojson import generateCylinderGeojson
 
 # Set the log level
 logging.root.setLevel(logging.INFO)
@@ -90,10 +90,11 @@ if conn is not None:
         logging.info("Fetching trees from the database...")
         # WARNING: The db is still mislabeled lat <> lng
         cur.execute(
-            "SELECT trees.id, trees.lat, trees.lng, trees.radolan_sum, trees.pflanzjahr FROM trees WHERE ST_CONTAINS(ST_SetSRID (( SELECT ST_EXTENT (geometry) FROM radolan_geometry), 4326), trees.geom)"
+            "SELECT trees.id, trees.lat, trees.lng, trees.radolan_sum, trees.pflanzjahr FROM trees WHERE ST_CONTAINS(ST_SetSRID (( SELECT ST_EXTENT (geometry) FROM radolan_geometry), 4326), trees.geom);"
         )
         trees = cur.fetchall()
 
+        # Creating trees.csv file
         header = "id,lng,lat,radolan_sum,age"
         logging.info(f"Creating trees.csv file for {len(trees)} trees")
 
@@ -110,6 +111,31 @@ if conn is not None:
 
         with open(trees_csv_full_path, "w") as out:
             out.write(trees_csv)
+
+        geojson = generateCylinderGeojson(trees)
+        geojson_full_path = os.path.join(path, "tree_cylinders.json")
+        geojson_processed_full_path = os.path.join(path, "tree_cylinders.mbtiles")
+
+        with open(geojson_full_path, "w") as out:
+            json.dump(geojson, out)
+
+        # Pre-process trees cylinders with tippecanoe
+        logging.info("Preprocess tree_cylinders.json with tippecanoe...")
+        subprocess.call(
+            [
+                "tippecanoe",
+                "-zg",
+                "-o",
+                geojson_processed_full_path,
+                "--force",
+                "--drop-fraction-as-needed",
+                geojson_full_path,
+            ]
+        )
+        logging.info("Preprocess tree_cylinders.json with tippecanoe... Done.")
+        upload_file_to_supabase_storage(
+            geojson_processed_full_path, "tree-cylinders-preprocessed.mbtiles"
+        )
 
         # Pre-process trees.csv with tippecanoe
         logging.info("Preprocess trees.csv with tippecanoe...")
@@ -134,76 +160,18 @@ if conn is not None:
         # Send the updated CSV to Mapbox
         if SKIP_MAPBOX != "True":
             try:
-                url = "https://api.mapbox.com/uploads/v1/{}/credentials?access_token={}".format(
-                    os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTOKEN")
-                )
-                response = requests.post(url)
-                s3_credentials = json.loads(response.content)
-
-                # Upload the latest data to S3
-                s3mapbox = boto3.client(
-                    "s3",
-                    aws_access_key_id=s3_credentials["accessKeyId"],
-                    aws_secret_access_key=s3_credentials["secretAccessKey"],
-                    aws_session_token=s3_credentials["sessionToken"],
-                )
-                s3mapbox.upload_file(
+                uploadAndRegenerateLayer(
                     trees_preprocessed_full_path,
-                    s3_credentials["bucket"],
-                    s3_credentials["key"],
-                )
-
-                # Tell Mapbox that new data has arrived
-                url = "https://api.mapbox.com/uploads/v1/{}?access_token={}".format(
-                    os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTOKEN")
-                )
-                payload = '{{"url":"http://{}.s3.amazonaws.com/{}","tileset":"{}.{}","name":"{}"}}'.format(
-                    s3_credentials["bucket"],
-                    s3_credentials["key"],
                     os.getenv("MAPBOXUSERNAME"),
                     os.getenv("MAPBOXTILESET"),
                     os.getenv("MAPBOXLAYERNAME"),
                 )
-                headers = {
-                    "content-type": "application/json",
-                    "Accept-Charset": "UTF-8",
-                    "Cache-Control": "no-cache",
-                }
-                response = requests.post(url, data=payload, headers=headers)
-                if response.status_code != 201:
-                    logging.error("Could not generate Mapbox upload")
-                    logging.error(response.content)
-
-                upload_id = json.loads(response.content)["id"]
-                logging.info(
-                    f"Initialized generation of Mapbox tilesets for upload={upload_id}..."
+                uploadAndRegenerateLayer(
+                    geojson_processed_full_path,
+                    os.getenv("MAPBOXUSERNAME"),
+                    os.getenv("MAPBOX_CYLINDER_TILESET"),
+                    os.getenv("MAPBOX_CYLINDER_LAYERNAME"),
                 )
-
-                # Check for the status of Mapbox upload until completed or error
-                complete = False
-                error = None
-                while not complete and error is None:
-                    url = "https://api.mapbox.com/uploads/v1/{}/{}?access_token={}".format(
-                        os.getenv("MAPBOXUSERNAME"), upload_id, os.getenv("MAPBOXTOKEN")
-                    )
-                    headers = {
-                        "content-type": "application/json",
-                        "Accept-Charset": "UTF-8",
-                        "Cache-Control": "no-cache",
-                    }
-                    response = requests.get(url, headers=headers)
-                    responseJson = json.loads(response.content)
-                    complete = responseJson["complete"]
-                    error = responseJson["error"]
-                    progress = responseJson["progress"]
-                    logging.info(
-                        f"Waiting for tileset generation for upload={upload_id} progress={progress} complete={complete} error={error}"
-                    )
-                    time.sleep(2)
-
-                if error is not None:
-                    logging.error(error)
-                    exit(1)
 
             except Exception as error:
                 logging.error("Could not upload tree data to Mapbox for vector tiles")
