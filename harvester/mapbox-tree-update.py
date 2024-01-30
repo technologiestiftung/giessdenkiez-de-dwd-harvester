@@ -29,6 +29,7 @@ SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_BUCKET_NAME = os.getenv("SUPABASE_BUCKET_NAME")
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
+
 # Function to check if a file exists in Supabase storage
 def check_file_exists_in_supabase_storage(file_name):
     url = f"{SUPABASE_URL}/storage/v1/object/info/public/{SUPABASE_BUCKET_NAME}/{file_name}"
@@ -114,10 +115,10 @@ if conn is not None:
         geojson = generateCylinderGeojson(trees)
         geojson_full_path = os.path.join(path, "tree_cylinders.json")
         geojson_processed_full_path = os.path.join(path, "tree_cylinders.mbtiles")
-        
+
         with open(geojson_full_path, "w") as out:
             json.dump(geojson, out)
-            
+
         # Pre-process trees cylinders with tippecanoe
         logging.info("Preprocess tree_cylinders.json with tippecanoe...")
         subprocess.call(
@@ -135,7 +136,7 @@ if conn is not None:
         upload_file_to_supabase_storage(
             geojson_processed_full_path, "tree-cylinders-preprocessed.mbtiles"
         )
-        
+
         # Pre-process trees.csv with tippecanoe
         logging.info("Preprocess trees.csv with tippecanoe...")
         subprocess.call(
@@ -159,8 +160,18 @@ if conn is not None:
         # Send the updated CSV to Mapbox
         if SKIP_MAPBOX != "True":
             try:
-                uploadAndRegenerateLayer(trees_preprocessed_full_path, os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOXTILESET"), os.getenv("MAPBOXLAYERNAME"))
-                uploadAndRegenerateLayer(geojson_processed_full_path, os.getenv("MAPBOXUSERNAME"), os.getenv("MAPBOX_CYLINDER_TILESET"), os.getenv("MAPBOX_CYLINDER_LAYERNAME"))
+                uploadAndRegenerateLayer(
+                    trees_preprocessed_full_path,
+                    os.getenv("MAPBOXUSERNAME"),
+                    os.getenv("MAPBOXTILESET"),
+                    os.getenv("MAPBOXLAYERNAME"),
+                )
+                uploadAndRegenerateLayer(
+                    geojson_processed_full_path,
+                    os.getenv("MAPBOXUSERNAME"),
+                    os.getenv("MAPBOX_CYLINDER_TILESET"),
+                    os.getenv("MAPBOX_CYLINDER_LAYERNAME"),
+                )
 
             except Exception as error:
                 logging.error("Could not upload tree data to Mapbox for vector tiles")
