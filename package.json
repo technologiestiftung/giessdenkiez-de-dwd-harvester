@@ -14,7 +14,22 @@
 	},
 	"homepage": "https://github.com/technologiestiftung/giessdenkiez-de-dwd-harvester#readme",
 	"devDependencies": {
-		"@saithodev/semantic-release-backmerge": "2.1.3",
-		"@technologiestiftung/semantic-release-config": "1.2.0"
+		"@saithodev/semantic-release-backmerge": "4.0.1",
+		"@technologiestiftung/semantic-release-config": "1.2.4"
+	},
+	"prettier": {
+		"tabWidth": 2,
+		"semi": true,
+		"singleQuote": false,
+		"useTabs": true,
+		"printWidth": 80,
+		"overrides": [
+			{
+				"files": ["*.yml", "*.yaml"],
+				"options": {
+					"useTabs": false
+				}
+			}
+		]
 	}
 }
