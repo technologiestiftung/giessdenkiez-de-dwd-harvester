@@ -34,4 +34,4 @@ RUN git clone https://github.com/mapbox/tippecanoe.git && cd tippecanoe &&  make
 COPY . /app/
 
 
-CMD python /app/harvester.py && python /app/mapbox-tree-update.py
+CMD python /app/harvester.py && python /app/mapbox_tree_update.py

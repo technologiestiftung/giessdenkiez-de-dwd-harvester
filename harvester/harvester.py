@@ -12,6 +12,7 @@ import psycopg2
 from dotenv import load_dotenv
 import logging
 import os
+from mapbox_tree_update import upload_file_to_supabase_storage
 
 # setting up logging
 logging.basicConfig()
@@ -307,7 +308,8 @@ if len(filelist) > 0:
         n = text_file.write(geojson)
         text_file.close()
         n = None
-
+        upload_file_to_supabase_storage(path + file_name, file_name)
+        
     finishGeojson(features, "weather.geojson")
     finishGeojson(features_light, "weather_light.geojson")
 
