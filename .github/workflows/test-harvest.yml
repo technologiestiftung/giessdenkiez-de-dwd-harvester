@@ -1,4 +1,7 @@
 name: harvester (test mode)
+permissions:
+  contents: write
+  packages: write
 
 on:
   push:
@@ -34,20 +37,20 @@ jobs:
     if: "!contains(github.event.head_commit.message, 'skip ci')"
     steps:
       - name: Get the source
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Use Node.js from .nvmrc
-        uses: actions/setup-node@v2
+        uses: actions/setup-node@v4
         with:
           node-version-file: ".nvmrc"
       - name: Get the source for the api staging
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: github.event.pull_request.base.ref == 'staging' || github.ref == 'refs/heads/staging'
         with:
           repository: technologiestiftung/giessdenkiez-de-postgres-api
           path: api
           ref: staging
       - name: Get the source for the api master
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         if: github.event.pull_request.base.ref == 'master' || github.ref == 'refs/heads/master'
         with:
           repository: technologiestiftung/giessdenkiez-de-postgres-api
@@ -72,17 +75,15 @@ jobs:
       new-release-published: ${{ steps.semantic-release.outputs.new_release_published }}
       new-release-version: ${{ steps.semantic-release.outputs.new_release_version }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version-file: ".nvmrc"
       - run: npm ci
       - id: semantic-release
-        uses: cycjimmy/semantic-release-action@v3
-        with:
-          semantic_version: 18
+        run: npx semantic-release
         env:
           GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
