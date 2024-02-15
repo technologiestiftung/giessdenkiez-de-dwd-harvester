@@ -10,6 +10,28 @@ def build_radolan_grid(db_conn):
 
     Returns:
         _type_: grid of radolan data
+
+        [
+            [
+                [radolon_hour_0, radolon_hour_1, ..., radolon_hour_x],
+                25,
+                '{"type":"Polygon","coordinates":[coordinates_for_polygon_0]}']
+            ],
+
+            [
+                [radolon_hour_0, radolon_hour_1, ..., radolon_hour_x],
+                3,
+                '{"type":"Polygon","coordinates":[coordinates_for_polygon_1]}']
+            ],
+
+            ...
+
+            [
+                [radolon_hour_0, radolon_hour_1, ..., radolon_hour_x],
+                40,
+                '{"type":"Polygon","coordinates":[coordinates_for_polygon_x]}']
+            ]
+        ]
     """
     print("Building radolan grid based on DB entries...")
 
