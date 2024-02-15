@@ -35,7 +35,8 @@ def project_radolan_data(hourly_radolan_file, shape_file, root_dir):
         "-cutline",
         shape_file,
     ]
-    subprocess.call(cmdline)
+    subprocess.call(cmdline, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+    print(f"Generated GeoTIFF file: {output_file}")
     return output_file
 
 
@@ -50,7 +51,7 @@ def polygonize_data(input_raster_file, root_dir):
         root_dir (str): Path to the directory holding the temp files
 
     Returns:
-        str: Path to generated polygon feature layer
+        str: Path to generated ESRI Shapefile
     """
     output_file = os.path.join(root_dir, input_raster_file.split("/")[-1] + ".shp")
     cmdline = [
@@ -59,8 +60,9 @@ def polygonize_data(input_raster_file, root_dir):
         "-f",
         "ESRI Shapefile",
         output_file,
-        "RADOLAN_LAYER",
-        "RADOLAN_FIELD",
+        "RDLLAYER",
+        "RDLFIELD",
     ]
-    subprocess.call(cmdline)
+    subprocess.call(cmdline, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
+    print(f"Generated ESRI Shapefile: {output_file}")
     return output_file

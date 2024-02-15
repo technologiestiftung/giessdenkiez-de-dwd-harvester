@@ -1,0 +1,53 @@
+import psycopg2.extras
+import psycopg2
+from dotenv import load_dotenv
+import logging
+import os
+from radolan_db_utils import update_trees
+from harvester_new import harvest_dwd
+
+# setting up logging
+logging.basicConfig()
+logging.root.setLevel(logging.INFO)
+
+# loading the environmental variables
+load_dotenv()
+
+# check if all required environmental variables are accessible
+for env_var in [
+    "PG_DB",
+    "PG_PORT",
+    "PG_USER",
+    "PG_PASS",
+    "SUPABASE_URL",
+    "SUPABASE_BUCKET_NAME",
+    "SUPABASE_SERVICE_ROLE_KEY",
+]:
+    if env_var not in os.environ:
+        logging.error("❌Environmental Variable {} does not exist".format(env_var))
+
+# database connection
+pg_server = os.getenv("PG_SERVER")
+pg_port = os.getenv("PG_PORT")
+pg_username = os.getenv("PG_USER")
+pg_password = os.getenv("PG_PASS")
+pg_database = os.getenv("PG_DB")
+
+database_connection = f"host='{pg_server}' port={pg_port} user='{pg_username}' password='{pg_password}' dbname='{pg_database}'"
+
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_BUCKET_NAME = os.getenv("SUPABASE_BUCKET_NAME")
+SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+
+try:
+    conn = psycopg2.connect(database_connection)
+    logging.info("🗄 Database connection established")
+except:
+    logging.error("❌Could not establish database connection")
+    conn = None
+
+# Start harvesting DWD
+radolan_grid = harvest_dwd(conn)
+
+# Update trees
+update_trees(radolan_grid, conn)
