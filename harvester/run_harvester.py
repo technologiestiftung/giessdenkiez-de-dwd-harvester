@@ -5,6 +5,9 @@ import logging
 import os
 from radolan_db_utils import update_trees
 from dwd_harvest import harvest_dwd
+from radolan_db_utils import (
+    get_start_end_harvest_dates,
+)
 
 # setting up logging
 logging.basicConfig()
@@ -47,7 +50,13 @@ except:
     conn = None
 
 # Start harvesting DWD
-radolan_grid = harvest_dwd(conn)
+start_date, end_date = get_start_end_harvest_dates(conn)
+radolan_grid = harvest_dwd(
+    surrounding_shape_file="./assets/buffer.shp",
+    start_date=start_date,
+    end_date=end_date,
+    conn=conn,
+)
 
 # Update trees
 update_trees(radolan_grid, conn)

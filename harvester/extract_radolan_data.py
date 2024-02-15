@@ -4,9 +4,17 @@ from shapely.wkt import dumps
 
 # Resources:
 # https://epsg.io/3857
-def extract_radolan_data_from_shapefile(
-    polygonized_shape_file, measured_at_timestamp, root_dir
-):
+# https://doc.arcgis.com/en/arcgis-online/reference/shapefiles.htm
+def extract_radolan_data_from_shapefile(polygonized_shape_file, measured_at_timestamp):
+    """Extract radolon values from given shapefile
+
+    Args:
+        polygonized_shape_file (_type_): the shapefile data should be extracted from
+        measured_at_timestamp (_type_): the timestamp of the extraction
+
+    Returns:
+        _type_: list of extracted radolon data for each cell in the shapefile
+    """
     radolan_field_key = "RDLFIELD"
     df = geopandas.read_file(polygonized_shape_file)
     df = df.to_crs("epsg:3857")

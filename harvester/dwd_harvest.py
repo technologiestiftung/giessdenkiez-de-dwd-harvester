@@ -1,5 +1,4 @@
 from datetime import datetime
-from datetime import timedelta
 import tempfile
 from download_radolan_data import download_radolan_data, unzip_radolan_data
 from project_radolan_data import project_radolan_data, polygonize_data
@@ -11,17 +10,21 @@ from radolan_db_utils import (
 from build_radolan_grid import build_radolan_grid
 
 
-def harvest_dwd(conn):
+def harvest_dwd(surrounding_shape_file, start_date, end_date, conn):
+    """Starts harvesting DWD radolan data based on database given in 'conn'
+
+    Args:
+        start_date (datetime): first day of radolon data to harvest
+        end_date (datetime): last day of radolon data to harvest
+        surrounding_shape_file (_type_): shapefile for area of interest
+        conn (_type_): database connection
+
+    Returns:
+        _type_: grid of radolan data for polygonized shapefile
+    """
     with tempfile.TemporaryDirectory() as temp_dir:
 
         # Download daily Radolan files from DWD for whole Germany
-        # start_date, end_date = get_start_end_harvest_dates(conn)
-        start_date = datetime.now() + timedelta(days=-1)
-        start_date = start_date.replace(hour=0, minute=0, second=0, microsecond=0)
-
-        end_date = datetime.now() + timedelta(days=-1)
-        end_date = end_date.replace(hour=0, minute=0, second=0, microsecond=0)
-
         daily_radolan_files = download_radolan_data(start_date, end_date, temp_dir)
 
         # Extract downloaded daily Radolan files into hourly Radolan data files
@@ -37,7 +40,7 @@ def harvest_dwd(conn):
 
                 # Generate projected GeoTIFF file containing projected data for given shape file only
                 projected_radolan_geotiff = project_radolan_data(
-                    hourly_radolan_file, "./assets/buffer.shp", hourly_temp_dir
+                    hourly_radolan_file, surrounding_shape_file, hourly_temp_dir
                 )
 
                 # Polygonize given GeoTIFF file
@@ -47,7 +50,7 @@ def harvest_dwd(conn):
 
                 # Extract Radolan data
                 extracted_radolan_values = extract_radolan_data_from_shapefile(
-                    polygonized_radolan, measured_at_timestamp, hourly_temp_dir
+                    polygonized_radolan, measured_at_timestamp
                 )
 
                 # Update Radolan data in DB

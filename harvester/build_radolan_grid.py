@@ -3,6 +3,14 @@ from datetime import timedelta
 
 
 def build_radolan_grid(db_conn):
+    """Builds a radolon grid based on radolon data in database
+
+    Args:
+        db_conn (_type_): the database connection
+
+    Returns:
+        _type_: grid of radolan data
+    """
     print("Building radolan grid based on DB entries...")
 
     limit_days = 30

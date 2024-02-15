@@ -4,6 +4,13 @@ from datetime import timedelta
 
 
 def get_start_end_harvest_dates(db_conn):
+    """Gets first and last day for harvesting
+
+    Args:
+        db_conn (_type_): the database connection
+    Returns:
+        _type_: array containing start_date and end_date
+    """
     print("Get start end end date for harvest...")
     with db_conn.cursor() as cur:
         cur.execute("SELECT collection_date FROM radolan_harvester WHERE id = 1")
@@ -14,7 +21,13 @@ def get_start_end_harvest_dates(db_conn):
 
 
 def upload_radolan_data_in_db(extracted_radolan_values, db_conn):
-    print("Upload radolan data to DB...")
+    """Uploads extracted radolon data into database
+
+    Args:
+        extracted_radolan_values (_type_): the radolon values to upload
+        db_conn (_type_): the database connection
+    """
+    print("Upload radolon data to DB...")
     with db_conn.cursor() as cur:
         cur.execute("DELETE FROM radolan_temp;")
         psycopg2.extras.execute_batch(
@@ -37,6 +50,12 @@ def upload_radolan_data_in_db(extracted_radolan_values, db_conn):
 
 
 def update_trees(radolan_grid, db_conn):
+    """Updates tree radolon data in database
+
+    Args:
+        radolan_grid (_type_): the radolon value grid to use for updating the trees
+        db_conn (_type_): the database connection
+    """
     print("Update trees...")
     with db_conn.cursor() as cur:
         psycopg2.extras.execute_batch(
@@ -57,6 +76,11 @@ def update_trees(radolan_grid, db_conn):
 
 
 def cleanup_radolan_entries(db_conn):
+    """Cleanup radolon data in database (old and duplicated data)
+
+    Args:
+        db_conn (_type_): the database connection
+    """
     print("Cleanup radolan entries in DB...")
     limit_days = 30
     with db_conn.cursor() as cur:
