@@ -7,7 +7,6 @@ from extract_radolan_data import extract_radolan_data_from_shapefile
 from radolan_db_utils import (
     upload_radolan_data_in_db,
     cleanup_radolan_entries,
-    get_start_end_harvest_dates,
 )
 from build_radolan_grid import build_radolan_grid
 

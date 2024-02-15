@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 import logging
 import os
 from radolan_db_utils import update_trees
-from harvester_new import harvest_dwd
+from dwd_harvest import harvest_dwd
 
 # setting up logging
 logging.basicConfig()
