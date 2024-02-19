@@ -1,12 +1,12 @@
 # building a buffer shape for filtering the weather data
 import geopandas
-from shapely.ops import cascaded_union
+from shapely.ops import unary_union
 
 berlin = geopandas.read_file("../assets/berlin.shp")
 
 berlin = berlin.to_crs("epsg:3857")
 berlin_boundary = geopandas.GeoDataFrame(
-    geopandas.GeoSeries(cascaded_union(berlin["geometry"]))
+    geopandas.GeoSeries(unary_union(berlin["geometry"]))
 )
 berlin_boundary = berlin_boundary.rename(columns={0: "geometry"}).set_geometry(
     "geometry"
