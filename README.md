@@ -64,9 +64,25 @@ This tool currently works for Berlin. To make use of it for another city, just r
 
 ### Running the Harvest Process
 
-`harvester/harvester.py` is the actual file for harvesting the data. Simply run, no command line parameters, all settings are in `.env`.
+`harvester/src/run_harvester.py` contains the script for running the DWD harvester, it does the following:
 
-The code in `harvester/harvester.py` tries to clean up after running the code. But, when running this in a container, as the script is completely stand alone, its probably best to just destroy the whole thing and start from scratch next time.
+- Checks for existens of all required environment variables
+- Setup database connection
+- Get start end end date of current harvesting run (for incremental harvesting every day)
+- Download all daily radolan files from DWD server
+- Extracts the daily radolan files into hourly radolan files
+- For each hourly radolan file:
+  - Projects the given data to Mercator, cuts out the area of interest. Using `gdalwarp` library.
+  - Produce a polygon feature layer. Using `gdal_polygonize.py` library.
+  - Extract raw radolan values from generate feature layer.
+  - Upload extracted radolan values to database
+- Cleanup old radolan values in database (keep only last 30 days)
+- Build a radolan grid holding the hourly radolan values for the last 30 days for each polygon in the grid.
+- Updates `radolan_sum` and `radolan_values` columns in the database `trees` table
+- Updates the Mapbox trees layer:
+  - Build a trees.csv file based on all trees (with updated radolan values) in the database
+  - Preprocess trees.csv using `tippecanoe` library.
+  - Start the creation of updated Mapbox layer
 
 ## Docker
 
