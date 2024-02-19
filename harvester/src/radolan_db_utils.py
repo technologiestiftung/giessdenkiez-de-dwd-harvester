@@ -54,7 +54,7 @@ def update_trees_in_database(radolan_grid, db_conn):
         radolan_grid (_type_): the radolon value grid to use for updating the trees
         db_conn (_type_): the database connection
     """
-    
+
     with db_conn.cursor() as cur:
         psycopg2.extras.execute_batch(
             cur,
@@ -62,7 +62,7 @@ def update_trees_in_database(radolan_grid, db_conn):
             UPDATE trees
             SET radolan_days = %s, radolan_sum = %s
             WHERE ST_CoveredBy(geom, ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326));
-            """
+            """,
             radolan_grid,
         )
         db_conn.commit()

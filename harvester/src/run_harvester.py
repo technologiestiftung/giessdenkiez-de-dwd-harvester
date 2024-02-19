@@ -64,7 +64,7 @@ except:
 # Start harvesting DWD data
 start_date, end_date = get_start_end_harvest_dates(database_connection)
 radolan_grid = harvest_dwd(
-    surrounding_shape_file="../assets/buffer.shp",
+    surrounding_shape_file="./assets/buffer.shp",
     start_date=start_date,
     end_date=end_date,
     limit_days=LIMIT_DAYS,
