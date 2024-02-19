@@ -39,7 +39,11 @@ def upload_to_mapbox_storage(path_to_file, mapbox_username, mapbox_token):
 
 
 def start_tileset_creation(
-    mapbox_storage_credentials, mapbox_username, mapbox_tileset, mapbox_token
+    mapbox_storage_credentials,
+    mapbox_username,
+    mapbox_tileset,
+    mapbox_layer_name,
+    mapbox_token,
 ):
     """Start the Mapbox tileset creation
 
@@ -60,7 +64,7 @@ def start_tileset_creation(
         mapbox_storage_credentials["key"],
         mapbox_username,
         mapbox_tileset,
-        mapbox_token,
+        mapbox_layer_name,
     )
     headers = {
         "content-type": "application/json",
@@ -93,9 +97,6 @@ def wait_for_tileset_creation_complete(
     complete = False
     error = None
     while not complete and error is None:
-        logging.info(
-            f"Waiting for tileset creation for upload={tileset_generation_id} progress={progress} complete={complete} error={error}"
-        )
         url = "https://api.mapbox.com/uploads/v1/{}/{}?access_token={}".format(
             mapbox_username,
             tileset_generation_id,
@@ -111,6 +112,9 @@ def wait_for_tileset_creation_complete(
         complete = responseJson["complete"]
         error = responseJson["error"]
         progress = responseJson["progress"]
+        logging.info(
+            f"Waiting for tileset creation for upload={tileset_generation_id} progress={progress} complete={complete} error={error}"
+        )
         time.sleep(2)
 
     return error

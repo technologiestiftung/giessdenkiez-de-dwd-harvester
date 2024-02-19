@@ -31,6 +31,7 @@ for env_var in [
     "MAPBOXUSERNAME",
     "MAPBOXTOKEN",
     "MAPBOXTILESET",
+    "MAPBOXLAYERNAME",
 ]:
     if env_var not in os.environ:
         logging.error("❌Environmental Variable {} does not exist".format(env_var))
@@ -39,11 +40,12 @@ for env_var in [
 SUPABASE_URL = os.getenv("SUPABASE_URL")
 SUPABASE_BUCKET_NAME = os.getenv("SUPABASE_BUCKET_NAME")
 SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-LIMIT_DAYS = os.getenv("LIMIT_DAYS")
+LIMIT_DAYS = int(os.getenv("LIMIT_DAYS"))
 SKIP_MAPBOX = os.getenv("SKIP_MAPBOX") == "True"
 MAPBOX_USERNAME = os.getenv("MAPBOXUSERNAME")
 MAPBOX_TOKEN = os.getenv("MAPBOXTOKEN")
 MAPBOX_TILESET = os.getenv("MAPBOXTILESET")
+MAPBOX_LAYERNAME = os.getenv("MAPBOXLAYERNAME")
 PG_SERVER = os.getenv("PG_SERVER")
 PG_PORT = os.getenv("PG_PORT")
 PG_USER = os.getenv("PG_USER")
@@ -77,10 +79,10 @@ update_trees_in_database(radolan_grid, database_connection)
 # Update Mapbox layer
 if not SKIP_MAPBOX:
     update_mapbox_tree_layer(
-        SKIP_MAPBOX,
         MAPBOX_USERNAME,
         MAPBOX_TOKEN,
         MAPBOX_TILESET,
+        MAPBOX_LAYERNAME,
         SUPABASE_URL,
         SUPABASE_BUCKET_NAME,
         SUPABASE_SERVICE_ROLE_KEY,

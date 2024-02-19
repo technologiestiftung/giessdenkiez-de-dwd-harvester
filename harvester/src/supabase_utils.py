@@ -19,7 +19,9 @@ def upload_file_to_supabase_storage(
         file_url = f"{supabaseUrl}/storage/v1/object/{supabaseBucketName}/{file_name}"
         http_method = (
             requests.put
-            if check_file_exists_in_supabase_storage(file_name)
+            if check_file_exists_in_supabase_storage(
+                supabaseUrl, supabaseBucketName, file_name
+            )
             else requests.post
         )
         response = http_method(

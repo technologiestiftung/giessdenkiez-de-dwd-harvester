@@ -49,7 +49,6 @@ def generate_trees_csv(temp_dir, db_conn):
     Returns:
         str: full path to the trees.csv file
     """
-    logging.info(f"Creatinging trees.csv file for {len(trees)} trees...")
     current_year = datetime.now().year
     with db_conn.cursor() as cur:
 
@@ -73,6 +72,7 @@ def generate_trees_csv(temp_dir, db_conn):
             """
         )
         trees = cur.fetchall()
+        logging.info(f"Creatinging trees.csv file for {len(trees)} trees...")
 
         # Build CSV file with all trees in it
         header = "id,lng,lat,radolan_sum,age"
@@ -93,6 +93,7 @@ def update_mapbox_tree_layer(
     mapbox_username,
     mapbox_token,
     mapbox_tileset,
+    mapbox_layer_name,
     supabase_url,
     supabase_bucket_name,
     supabase_service_role_key,
@@ -128,6 +129,7 @@ def update_mapbox_tree_layer(
             mapbox_storage_credentials,
             mapbox_username,
             mapbox_tileset,
+            mapbox_layer_name,
             mapbox_token,
         )
 
