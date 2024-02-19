@@ -2,15 +2,16 @@ from datetime import datetime
 from datetime import timedelta
 
 
-def build_radolan_grid(db_conn):
+def build_radolan_grid(limit_days, db_conn):
     """Builds a radolon grid based on radolon data in database
 
     Args:
+        limit_days (number): number of previous days to harvest data for
         db_conn (_type_): the database connection
 
-    Returns:
-        _type_: grid of radolan data
 
+    Returns:
+        _type_: grid of radolan data containing hourly radolan data for each hour of every polygon, structure below:
         [
             [
                 [radolon_hour_0, radolon_hour_1, ..., radolon_hour_x],
@@ -33,9 +34,6 @@ def build_radolan_grid(db_conn):
             ]
         ]
     """
-    print("Building radolan grid based on DB entries...")
-
-    limit_days = 30
 
     grid = []
     with db_conn.cursor() as cur:
@@ -68,11 +66,6 @@ def build_radolan_grid(db_conn):
 
     grid_radolan_values = []
     for cell in grid:
-        # cell structure:
-        # index 0 => geometry id
-        # index 1 => full geojson
-        # index 2 => list of datetime
-        # index 3 => list of radolan values
         measured_dates = cell[2]
         measured_radolan_values = cell[3]
         radolan_values_for_cell = []

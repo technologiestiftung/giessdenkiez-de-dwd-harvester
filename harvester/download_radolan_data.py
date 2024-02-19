@@ -29,15 +29,11 @@ def download_radolan_data(start_date, end_date, path):
         file_name = f"RW-{date_str}.tar.gz"
         download_url = f"{url}/{file_name}"
         dest_file = os.path.join(path, file_name)
-
-        try:
-            urllib.request.urlretrieve(download_url, dest_file)
-            downloaded_files.append(dest_file)
-            logging.info(f"Downloaded: {download_url}")
-        except Exception as e:
-            logging.warning(f"Failed to download {url}: {e}")
-
+        urllib.request.urlretrieve(download_url, dest_file)
+        downloaded_files.append(dest_file)
         start_date += timedelta(days=1)
+        logging.info(f"Downloaded: {download_url}")
+
     return downloaded_files
 
 

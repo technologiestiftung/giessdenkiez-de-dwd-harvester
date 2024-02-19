@@ -35,7 +35,6 @@ def project_radolan_data(hourly_radolan_file, shape_file, root_dir):
         shape_file,
     ]
     subprocess.call(cmdline, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-    print(f"Generated GeoTIFF file: {output_file}")
     return output_file
 
 
@@ -63,5 +62,4 @@ def polygonize_data(input_raster_file, root_dir):
         "RDLFIELD",
     ]
     subprocess.call(cmdline, stdout=subprocess.DEVNULL, stderr=subprocess.STDOUT)
-    print(f"Generated ESRI Shapefile: {output_file}")
     return output_file
