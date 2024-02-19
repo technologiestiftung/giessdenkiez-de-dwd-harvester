@@ -28,13 +28,13 @@ def harvest_dwd(
     """
     with tempfile.TemporaryDirectory() as temp_dir:
 
-        # Download daily Radolan files from DWD for whole Germany
+        # Download daily radolan files from DWD for whole Germany
         daily_radolan_files = download_radolan_data(start_date, end_date, temp_dir)
 
-        # Extract downloaded daily Radolan files into hourly Radolan data files
+        # Extract downloaded daily radolan files into hourly radolan data files
         hourly_radolan_files = unzip_radolan_data(daily_radolan_files, temp_dir)
 
-        # Process all hourly Radolan files
+        # Process all hourly radolan files
         for hourly_radolan_file in hourly_radolan_files:
 
             filename = hourly_radolan_file.split("/")[-1]
@@ -52,12 +52,12 @@ def harvest_dwd(
                     projected_radolan_geotiff, hourly_temp_dir
                 )
 
-                # Extract Radolan data
+                # Extract radolan data
                 extracted_radolan_values = extract_radolan_data_from_shapefile(
                     polygonized_radolan, measured_at_timestamp
                 )
 
-                # Update Radolan data in DB
+                # Update radolan data in DB
                 upload_radolan_data_in_db(extracted_radolan_values, database_connection)
 
         # After all database inserts, cleanup db

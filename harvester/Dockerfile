@@ -27,11 +27,6 @@ COPY --from=builder /install /usr/local
 RUN apt-get update && apt-get -y install git && apt-get -y install make
 RUN git clone https://github.com/mapbox/tippecanoe.git && cd tippecanoe &&  make -j && make install
 
-# COPY harvester.py /app/
-# COPY prepare.py /app/
-# COPY grid/ grid/
-# COPY assets/ /app/assets
 COPY . /app/
 
-
-CMD python /app/harvester.py && python /app/mapbox_tree_update.py
+CMD python /app/src/run_harvester.py

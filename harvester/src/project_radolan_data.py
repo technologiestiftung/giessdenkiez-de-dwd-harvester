@@ -8,7 +8,7 @@ import subprocess
 # https://gdal.org/programs/gdalwarp.html
 # https://www.ogc.org/standard/geotiff/
 def project_radolan_data(hourly_radolan_file, shape_file, root_dir):
-    """Projects the given Radolan to Mercator, cuts out the area of interest by using a shape file.
+    """Projects the given radolan data to Mercator, cuts out the area of interest by using a shape file.
 
     Args:
         hourly_radolan_file (str): Path to the hourly radolan file

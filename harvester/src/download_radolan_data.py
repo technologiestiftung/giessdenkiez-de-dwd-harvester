@@ -6,22 +6,22 @@ import gzip
 import tarfile
 import shutil
 
-# We are using Radolan data from DWD
+# We are using radolan data from DWD
 # https://www.dwd.de/DE/leistungen/radolan/radolan.html
 # https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/recent/asc/DESCRIPTION_gridsgermany-hourly-radolan-recent-asc_en.pdf
 url = f"https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/recent/asc"
 
 
 def download_radolan_data(start_date, end_date, path):
-    """Download Radolan data from DWD
+    """Download radolan data from DWD
 
     Args:
-        start_date (str): The first day to download Radolan data for
-        end_date (str): The last day to download Radolan data for
+        start_date (str): The first day to download radolan data for
+        end_date (str): The last day to download radolan data for
         path (str): The full path where the downloaded files should be stored
 
     Returns:
-        list[str]: List of file paths of the downloaded files. Each file contains zipped Radolan data files for each hour of the day.
+        list[str]: List of file paths of the downloaded files. Each file contains zipped radolan data files for each hour of the day.
     """
     downloaded_files = []
     while start_date <= end_date:
@@ -37,17 +37,17 @@ def download_radolan_data(start_date, end_date, path):
     return downloaded_files
 
 
-def unzip_radolan_data(zipped_radar_files, root_path):
-    """Extract the previously downloaded Radolan files to get the hourly Radolan files
+def unzip_radolan_data(zipped_radolan_files, root_path):
+    """Extract the previously downloaded radolan files to get the hourly radolan files
 
     Args:
-        zipped_radar_files (list[str]): List of zipped Radolan files
+        zipped_radolan_files (list[str]): List of zipped radolan files
         root_path (str): Path where the extracted files should be stored
 
     Returns:
-        list[str]: List of paths to the extracted Radolan files. Each file contains the hourly Radolan data.
+        list[str]: List of paths to the extracted radolan files. Each file contains the hourly radolan data.
     """
-    for _, filename in enumerate(zipped_radar_files):
+    for _, filename in enumerate(zipped_radolan_files):
         if filename.endswith(".tar.gz"):
             # Unzip
             with gzip.open(filename, "rb") as f_in:
@@ -63,7 +63,7 @@ def unzip_radolan_data(zipped_radar_files, root_path):
                 tar.close()
 
             os.remove(filename[:-3])
-            logging.info(f"Extracting hourly Radolan files from: {filename}")
+            logging.info(f"Extracting hourly radolan files from: {filename}")
 
     unzipped_files = [
         os.path.join(root, file)
