@@ -24,8 +24,8 @@ logging.root.setLevel(logging.INFO)
 
 # name of folder that contains the data
 temp = "temp"
-# if os.path.isdir(temp) != True:
-#   os.mkdir(temp)
+if os.path.isdir(temp) != True:
+    os.mkdir(temp)
 
 # # grid file
 # if (len(sys.argv) < 2):
