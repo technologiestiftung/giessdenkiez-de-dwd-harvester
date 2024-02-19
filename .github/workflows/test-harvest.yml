@@ -64,7 +64,7 @@ jobs:
         id: api-start
         run: cd api && supabase start | grep -w "service_role key" | cut -d ":" -f 2 | xargs |  tr -d '\n' | awk '{print "service_role_key="$1}' >> "$GITHUB_OUTPUT" && cd ..
       - name: run the harvester
-        run: docker run --env PG_SERVER='0.0.0.0' --env SKIP_MAPBOX --env PG_DB --env PG_PORT --env PG_USER --env PG_PASS --env SUPABASE_URL --env SUPABASE_SERVICE_ROLE_KEY='${{ steps.api-start.outputs.service_role_key }}' --env LIMIT_DAYS='30' --env SUPABASE_BUCKET_NAME --env MAPBOXTOKEN --env MAPBOXUSERNAME --env MAPBOXTILESET --MAPBOXLAYERNAME --env LOGGING --env OUTPUT --network host technologiestiftung/giessdenkiez-de-dwd-harvester:test
+        run: docker run --env PG_SERVER='0.0.0.0' --env SKIP_MAPBOX --env PG_DB --env PG_PORT --env PG_USER --env PG_PASS --env SUPABASE_URL --env SUPABASE_SERVICE_ROLE_KEY='${{ steps.api-start.outputs.service_role_key }}' --env LIMIT_DAYS='30' --env SUPABASE_BUCKET_NAME --env MAPBOXTOKEN --env MAPBOXUSERNAME --env MAPBOXTILESET --env MAPBOXLAYERNAME --env LOGGING --env OUTPUT --network host technologiestiftung/giessdenkiez-de-dwd-harvester:test
       - name: stop the api
         run: cd api && supabase stop && cd ..
   release:
