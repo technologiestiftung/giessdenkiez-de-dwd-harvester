@@ -23,6 +23,8 @@ def project_radolan_data(hourly_radolan_file, shape_file, tmp_dir):
         "gdalwarp",
         hourly_radolan_file,
         output_file,
+        "-s_srs",
+        "+proj=stere +lon_0=10.0 +lat_0=90.0 +lat_ts=60.0 +a=6370040 +b=6370040 +units=m",
         "-t_srs",
         "+proj=stere +lon_0=10.0 +lat_0=90.0 +lat_ts=60.0 +a=6370040 +b=6370040 +units=m",
         "-r",
