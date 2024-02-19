@@ -32,6 +32,7 @@ for env_var in [
     "MAPBOXTOKEN",
     "MAPBOXTILESET",
     "MAPBOXLAYERNAME",
+    "SURROUNDING_SHAPE_FILE",
 ]:
     if env_var not in os.environ:
         logging.error("❌Environmental Variable {} does not exist".format(env_var))
@@ -51,7 +52,7 @@ PG_PORT = os.getenv("PG_PORT")
 PG_USER = os.getenv("PG_USER")
 PG_PASS = os.getenv("PG_PASS")
 PG_DB = os.getenv("PG_DB")
-
+SURROUNDING_SHAPE_FILE = os.getenv("SURROUNDING_SHAPE_FILE")
 
 # Establish database connection
 try:
@@ -66,7 +67,7 @@ except:
 # Start harvesting DWD data
 start_date, end_date = get_start_end_harvest_dates(database_connection)
 radolan_grid = harvest_dwd(
-    surrounding_shape_file="./assets/buffer.shp",
+    surrounding_shape_file=SURROUNDING_SHAPE_FILE,
     start_date=start_date,
     end_date=end_date,
     limit_days=LIMIT_DAYS,

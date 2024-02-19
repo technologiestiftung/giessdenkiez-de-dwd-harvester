@@ -54,6 +54,10 @@ inputs:
     description: "The number of days to harvest DWD data for"
     required: true
     default: "30"
+  SURROUNDING_SHAPE_FILE:
+    description: "The path to the shape file of the area of interest"
+    required: true
+    default: "assets/buffer.shp"
 runs:
   using: "docker"
   image: "harvester/Dockerfile"
@@ -74,3 +78,4 @@ runs:
     DATABASE_URL: ${{ inputs.DATABASE_URL }}
     SKIP_MAPBOX: ${{ inputs.SKIP_MAPBOX }}
     LIMIT_DAYS: ${{ inputs.LIMIT_DAYS }}
+    SURROUNDING_SHAPE_FILE: ${{ inputs.SURROUNDING_SHAPE_FILE }}
