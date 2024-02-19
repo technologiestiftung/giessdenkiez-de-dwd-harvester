@@ -50,6 +50,10 @@ inputs:
     description: "Set to 'True' to skip the Mapbox Tileset generation (for testing pipelines)"
     required: true
     default: "False"
+  LIMIT_DAYS:
+    description: "The number of days to harvest DWD data for"
+    required: true
+    default: "30"
 runs:
   using: "docker"
   image: "harvester/Dockerfile"
@@ -69,3 +73,4 @@ runs:
     LOGGING: ${{ inputs.LOGGING }}
     DATABASE_URL: ${{ inputs.DATABASE_URL }}
     SKIP_MAPBOX: ${{ inputs.SKIP_MAPBOX }}
+    LIMIT_DAYS: ${{ inputs.LIMIT_DAYS }}
