@@ -1,6 +1,7 @@
 import psycopg2
 from datetime import datetime
 from datetime import timedelta
+import logging
 
 
 def get_start_end_harvest_dates(db_conn):
@@ -11,6 +12,7 @@ def get_start_end_harvest_dates(db_conn):
     Returns:
         _type_: array containing start_date and end_date
     """
+    logging.info(f"Getting first and last day for harvesting...")
     with db_conn.cursor() as cur:
         cur.execute("SELECT collection_date FROM radolan_harvester WHERE id = 1")
         last_date = cur.fetchone()[0]
@@ -26,6 +28,7 @@ def upload_radolan_data_in_db(extracted_radolan_values, db_conn):
         extracted_radolan_values (_type_): the radolon values to upload
         db_conn (_type_): the database connection
     """
+    logging.info(f"Uploading radolan data to database...")
     with db_conn.cursor() as cur:
         cur.execute("DELETE FROM radolan_temp;")
         psycopg2.extras.execute_batch(
@@ -54,7 +57,7 @@ def update_trees_in_database(radolan_grid, db_conn):
         radolan_grid (_type_): the radolon value grid to use for updating the trees
         db_conn (_type_): the database connection
     """
-
+    logging.info(f"Updating trees in database...")
     with db_conn.cursor() as cur:
         psycopg2.extras.execute_batch(
             cur,
@@ -88,6 +91,7 @@ def cleanup_radolan_entries(limit_days, db_conn):
         limit_days (number): number of previous days to keep radolan data for
         db_conn (_type_): the database connection
     """
+    logging.info(f"Cleanup old and duplicated datat in database...")
     with db_conn.cursor() as cur:
         # Delete duplicated data
         cur.execute(

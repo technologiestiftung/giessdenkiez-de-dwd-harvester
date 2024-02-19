@@ -1,5 +1,6 @@
 import geopandas
 from shapely.wkt import dumps
+import logging
 
 
 # Resources:
@@ -15,6 +16,7 @@ def extract_radolan_data_from_shapefile(polygonized_shape_file, measured_at_time
     Returns:
         _type_: list of extracted radolon data for each cell in the shapefile
     """
+    logging.info(f"Extracting radolan data for {polygonized_shape_file}...")
     radolan_field_key = "RDLFIELD"
     df = geopandas.read_file(polygonized_shape_file)
     df = df.to_crs("epsg:3857")

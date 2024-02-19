@@ -49,6 +49,7 @@ def generate_trees_csv(temp_dir, db_conn):
     Returns:
         str: full path to the trees.csv file
     """
+    logging.info(f"Generating trees.csv...")
     current_year = datetime.now().year
     with db_conn.cursor() as cur:
 

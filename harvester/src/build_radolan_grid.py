@@ -1,5 +1,6 @@
 from datetime import datetime
 from datetime import timedelta
+import logging
 
 
 def build_radolan_grid(limit_days, db_conn):
@@ -34,7 +35,7 @@ def build_radolan_grid(limit_days, db_conn):
             ]
         ]
     """
-
+    logging.info(f"Building radolan grid for last {limit_days} days...")
     grid = []
     with db_conn.cursor() as cur:
         cur.execute(

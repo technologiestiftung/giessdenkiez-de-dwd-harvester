@@ -1,5 +1,6 @@
 import os
 import subprocess
+import logging
 
 
 # Resources:
@@ -16,7 +17,7 @@ def project_radolan_data(hourly_radolan_file, shape_file, tmp_dir):
     Returns:
         str: Path to the generated GeoTIFF file
     """
-    print(f"Projecting radolan data for {hourly_radolan_file}")
+    logging.info(f"Projecting radolan data for {hourly_radolan_file}...")
     output_file = os.path.join(tmp_dir, hourly_radolan_file.split("/")[-1] + ".tiff")
     cmdline = [
         "gdalwarp",
@@ -48,7 +49,7 @@ def polygonize_data(input_raster_file, root_dir):
     Returns:
         str: Path to generated ESRI Shapefile
     """
-    print(f"Polygonize radolan data for {input_raster_file}")
+    logging.info(f"Polygonize radolan data for {input_raster_file}...")
     output_file = os.path.join(root_dir, input_raster_file.split("/")[-1] + ".shp")
     cmdline = [
         "gdal_polygonize.py",

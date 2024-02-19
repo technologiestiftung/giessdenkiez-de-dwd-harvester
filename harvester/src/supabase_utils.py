@@ -35,6 +35,6 @@ def upload_file_to_supabase_storage(
         )
 
         if response.status_code == 200:
-            logging.info(f"Uploaded {file_name} to Supabase storage")
+            logging.info(f"Uploaded {file_name} to Supabase storage...")
         else:
             logging.error(response)

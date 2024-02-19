@@ -30,7 +30,7 @@ def download_radolan_data(start_date, end_date, path):
         urllib.request.urlretrieve(download_url, dest_file)
         downloaded_files.append(dest_file)
         start_date += timedelta(days=1)
-        logging.info(f"Downloaded: {download_url}")
+        logging.info(f"Downloading {download_url}...")
 
     return downloaded_files
 
@@ -59,7 +59,7 @@ def unzip_radolan_data(zipped_radar_files, root_path):
                 tar.close()
 
             os.remove(filename[:-3])
-            logging.info(f"Extracting hourly Radolan files from: {filename}")
+            logging.info(f"Extracting hourly Radolan files from: {filename}...")
 
     unzipped_files = [
         os.path.join(root, file)
