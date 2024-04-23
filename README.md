@@ -50,6 +50,24 @@ The current python binding of gdal is fixed to GDAL==2.4.2. If you get another g
 
 Copy the `sample.env` file and rename to `.env` then update the parameters, most importantly the database connection parameters.
 
+```
+PG_SERVER=localhost
+PG_PORT=54322
+PG_USER=postgres
+PG_PASS=postsgres
+PG_DB=postgres
+SUPABASE_URL=http://127.0.0.1:54321
+SUPABASE_SERVICE_ROLE=eyJh...
+SUPABASE_BUCKET_NAME=data_assets
+MAPBOXUSERNAME=your_mapbox_username
+MAPBOXTOKEN=your_mapbox
+MAPBOXTILESET=your_mapbox_tileset_id
+MAPBOXLAYERNAME=your_mapbox_layer_name
+SKIP_MAPBOX=False
+LIMIT_DAYS=30
+SURROUNDING_SHAPE_FILE=./assets/buffer.shp
+```
+
 ## Running
 
 Starting from an empty database, the complete process of running the DWD harvester consists of three steps:

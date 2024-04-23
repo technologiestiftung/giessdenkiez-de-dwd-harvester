@@ -301,3 +301,5 @@ harvester/assets/buffer.prj
 harvester/assets/buffer.shp
 harvester/assets/buffer.dbf
 harvester/assets/buffer.shx
+
+harvester/.vscode
