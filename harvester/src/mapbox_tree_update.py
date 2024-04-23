@@ -62,7 +62,8 @@ def generate_trees_csv(temp_dir, db_conn):
                 trees.lat,
                 trees.lng,
                 trees.radolan_sum,
-                trees.pflanzjahr
+                trees.pflanzjahr,
+                (SELECT COALESCE(SUM(w.amount), 0)::INT AS total_amount FROM trees_watered w WHERE w.timestamp >= CURRENT_DATE - INTERVAL '30 days' AND w.tree_id = trees.id) as watering_sum
             FROM
                 trees
             WHERE
@@ -73,14 +74,16 @@ def generate_trees_csv(temp_dir, db_conn):
             """
         )
         trees = cur.fetchall()
-        logging.info(f"Creatinging trees.csv file for {len(trees)} trees...")
+        logging.info(f"Creating trees.csv file for {len(trees)} trees...")
 
         # Build CSV file with all trees in it
-        header = "id,lng,lat,radolan_sum,age"
+        header = "id,lng,lat,radolan_sum,age,watering_sum"
         lines = []
         for tree in tqdm(trees):
             age = int(current_year) - int(tree[4]) if tree[4] != 0 else ""
-            line = "{},{},{},{},{}".format(tree[0], tree[1], tree[2], tree[3], age)
+            line = "{},{},{},{},{}".format(
+                tree[0], tree[1], tree[2], tree[3], age, tree[5]
+            )
             lines.append(line)
         trees_csv = "\n".join([header] + lines)
         trees_csv_full_path = os.path.join(temp_dir, "trees.csv")
