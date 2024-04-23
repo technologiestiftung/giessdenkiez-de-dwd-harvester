@@ -29,6 +29,6 @@ RUN git clone https://github.com/mapbox/tippecanoe.git && cd tippecanoe &&  make
 
 COPY . /app/
 
-RUN cd /app/prepare && SHAPE_RESTORE_SHX=YES python create-buffer.py 
+RUN cd /app/prepare && SHAPE_RESTORE_SHX=YES python create-buffer.py
 
-CMD python /app/run_harvester.py
+CMD python /app/src/run_harvester.py
