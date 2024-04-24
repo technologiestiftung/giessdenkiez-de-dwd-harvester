@@ -81,7 +81,7 @@ def generate_trees_csv(temp_dir, db_conn):
         lines = []
         for tree in tqdm(trees):
             age = int(current_year) - int(tree[4]) if tree[4] != 0 else ""
-            line = "{},{},{},{},{}".format(
+            line = "{},{},{},{},{},{}".format(
                 tree[0], tree[1], tree[2], tree[3], age, tree[5]
             )
             lines.append(line)
