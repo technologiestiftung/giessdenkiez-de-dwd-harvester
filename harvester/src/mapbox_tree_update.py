@@ -77,19 +77,23 @@ def generate_trees_csv(temp_dir, db_conn):
         logging.info(f"Creating trees.csv file for {len(trees)} trees...")
 
         # Build CSV file with all trees in it
-        header = "id,lng,lat,radolan_sum,age,watering_sum,total_water_sum"
+        header = "id,lng,lat,radolan_sum,age,watering_sum,total_water_sum_liters"
         lines = []
         for tree in tqdm(trees):
             id = tree[0]
             lat = tree[1]
             lng = tree[2]
+            # precipitation height in 0.1 mm per square meter
+            # 1mm on a square meter is 1 liter
+            # e.g. value of 380 = 0.1 * 380 = 38.0 mm * 1 liter = 38 liters
             radolan_sum = tree[3]
             pflanzjahr = tree[4]
             watering_sum = tree[5]
             age = int(current_year) - int(pflanzjahr) if int(pflanzjahr) != 0 else ""
-            total_water_sum = radolan_sum + watering_sum
+            # calculated in liters to be easily usable in the frontend
+            total_water_sum_liters = (radolan_sum / 10) + watering_sum
             line = "{},{},{},{},{},{},{}".format(
-                id, lat, lng, radolan_sum, age, watering_sum, total_water_sum
+                id, lat, lng, radolan_sum, age, watering_sum, total_water_sum_liters
             )
             lines.append(line)
         trees_csv = "\n".join([header] + lines)
