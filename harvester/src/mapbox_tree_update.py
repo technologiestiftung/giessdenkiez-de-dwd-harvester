@@ -77,12 +77,19 @@ def generate_trees_csv(temp_dir, db_conn):
         logging.info(f"Creating trees.csv file for {len(trees)} trees...")
 
         # Build CSV file with all trees in it
-        header = "id,lng,lat,radolan_sum,age,watering_sum"
+        header = "id,lng,lat,radolan_sum,age,watering_sum,total_water_sum"
         lines = []
         for tree in tqdm(trees):
-            age = int(current_year) - int(tree[4]) if tree[4] != 0 else ""
-            line = "{},{},{},{},{},{}".format(
-                tree[0], tree[1], tree[2], tree[3], age, tree[5]
+            id = tree[0]
+            lat = tree[1]
+            lng = tree[2]
+            radolan_sum = tree[3]
+            pflanzjahr = tree[4]
+            watering_sum = tree[5]
+            age = int(current_year) - int(pflanzjahr) if int(pflanzjahr) != 0 else ""
+            total_water_sum = radolan_sum + watering_sum
+            line = "{},{},{},{},{},{},{}".format(
+                id, lat, lng, radolan_sum, age, watering_sum, total_water_sum
             )
             lines.append(line)
         trees_csv = "\n".join([header] + lines)
