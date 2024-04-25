@@ -92,9 +92,7 @@ def generate_trees_csv(temp_dir, db_conn):
             age = int(current_year) - int(pflanzjahr) if int(pflanzjahr) != 0 else ""
             # calculated in liters to be easily usable in the frontend
             total_water_sum_liters = (radolan_sum / 10) + watering_sum
-            line = "{},{},{},{},{},{},{}".format(
-                id, lat, lng, radolan_sum, age, watering_sum, total_water_sum_liters
-            )
+            line = f"{id}, {lat}, {lng}, {radolan_sum}, {age}, {watering_sum}, {total_water_sum_liters}"
             lines.append(line)
         trees_csv = "\n".join([header] + lines)
         trees_csv_full_path = os.path.join(temp_dir, "trees.csv")
