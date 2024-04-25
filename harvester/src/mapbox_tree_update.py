@@ -63,7 +63,7 @@ def generate_trees_csv(temp_dir, db_conn):
                 trees.lng,
                 trees.radolan_sum,
                 trees.pflanzjahr,
-                (SELECT COALESCE(SUM(w.amount), 0)::INT AS total_amount FROM trees_watered w WHERE w.timestamp >= CURRENT_DATE - INTERVAL '30 days' AND w.tree_id = trees.id) as watering_sum
+                (SELECT COALESCE(SUM(w.amount), 0)::INT AS total_amount FROM trees_watered w WHERE w.timestamp >= CURRENT_DATE - INTERVAL '30 days' AND DATE_TRUNC('day', w.timestamp) < CURRENT_DATE AND w.tree_id = trees.id) as watering_sum
             FROM
                 trees
             WHERE
