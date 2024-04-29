@@ -292,3 +292,14 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# Generated files
+harvester/assets/berlin.shx
+harvester/assets/buffer.cpg
+harvester/assets/buffer.dbf
+harvester/assets/buffer.prj
+harvester/assets/buffer.shp
+harvester/assets/buffer.dbf
+harvester/assets/buffer.shx
+
+harvester/.vscode
