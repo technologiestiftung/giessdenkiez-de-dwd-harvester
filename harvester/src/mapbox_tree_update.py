@@ -57,20 +57,21 @@ def generate_trees_csv(temp_dir, db_conn):
         cur.execute(
             # WARNING: The coordinates in the database columns lat and lng are mislabeled! They mean the opposite.
             """
-            SELECT
-                trees.id,
-                trees.lat,
-                trees.lng,
-                trees.radolan_sum,
-                trees.pflanzjahr,
-                (SELECT COALESCE(SUM(w.amount), 0)::INT AS total_amount FROM trees_watered w WHERE w.timestamp >= CURRENT_DATE - INTERVAL '30 days' AND DATE_TRUNC('day', w.timestamp) < CURRENT_DATE AND w.tree_id = trees.id) as watering_sum
-            FROM
-                trees
-            WHERE
-                ST_CONTAINS(ST_SetSRID ((
-                        SELECT
-                            ST_EXTENT (geometry)
-                            FROM radolan_geometry), 4326), trees.geom)
+                SELECT
+                    trees.id,
+                    trees.lat,
+                    trees.lng,
+                    trees.radolan_sum,
+                    trees.pflanzjahr,
+                    COALESCE(SUM(w.amount), 0) AS watering_sum
+                FROM
+                    trees
+                LEFT JOIN
+                    trees_watered w ON w.tree_id = trees.id AND w.timestamp >= CURRENT_DATE - INTERVAL '30 days' AND DATE_TRUNC('day', w.timestamp) < CURRENT_DATE
+                WHERE
+                    ST_CONTAINS(ST_SetSRID ((SELECT ST_EXTENT (geometry) FROM radolan_geometry), 4326), trees.geom)
+                GROUP BY
+                    trees.id, trees.lat, trees.lng, trees.radolan_sum, trees.pflanzjahr;
             """
         )
         trees = cur.fetchall()
@@ -86,12 +87,12 @@ def generate_trees_csv(temp_dir, db_conn):
             # precipitation height in 0.1 mm per square meter
             # 1mm on a square meter is 1 liter
             # e.g. value of 380 = 0.1 * 380 = 38.0 mm * 1 liter = 38 liters
-            radolan_sum = tree[3]
+            radolan_sum = float(tree[3])
             pflanzjahr = tree[4]
-            watering_sum = tree[5]
+            watering_sum = float(tree[5])
             age = int(current_year) - int(pflanzjahr) if int(pflanzjahr) != 0 else ""
             # calculated in liters to be easily usable in the frontend
-            total_water_sum_liters = (radolan_sum / 10) + watering_sum
+            total_water_sum_liters = (radolan_sum / 10.0) + watering_sum
             line = f"{id}, {lat}, {lng}, {radolan_sum}, {age}, {watering_sum}, {total_water_sum_liters}"
             lines.append(line)
         trees_csv = "\n".join([header] + lines)
