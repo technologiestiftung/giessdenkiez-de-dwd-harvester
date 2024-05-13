@@ -59,8 +59,8 @@ def generate_trees_csv(temp_dir, db_conn):
             """
                 SELECT
                     trees.id,
-                    trees.lat,
-                    trees.lng,
+                    ST_Y(geom) AS lat,
+                    ST_X(geom) AS lng,
                     trees.radolan_sum,
                     trees.pflanzjahr,
                     COALESCE(SUM(w.amount), 0) AS watering_sum
@@ -84,15 +84,24 @@ def generate_trees_csv(temp_dir, db_conn):
             id = tree[0]
             lat = tree[1]
             lng = tree[2]
+
             # precipitation height in 0.1 mm per square meter
             # 1mm on a square meter is 1 liter
             # e.g. value of 380 = 0.1 * 380 = 38.0 mm * 1 liter = 38 liters
-            radolan_sum = float(tree[3])
+            radolan_sum = float(tree[3]) if tree[3] != None else 0
+
+            # Age is undefined ("" for Mapbox) if pflanzjahr is None or 0
             pflanzjahr = tree[4]
+            age = (
+                ""
+                if (pflanzjahr == None or pflanzjahr == 0)
+                else int(current_year) - int(pflanzjahr)
+            )
+
+            # total_water_sum_liters calculated in liters to be easily usable in the frontend
             watering_sum = float(tree[5])
-            age = int(current_year) - int(pflanzjahr) if int(pflanzjahr) != 0 else ""
-            # calculated in liters to be easily usable in the frontend
             total_water_sum_liters = (radolan_sum / 10.0) + watering_sum
+
             line = f"{id}, {lat}, {lng}, {radolan_sum}, {age}, {watering_sum}, {total_water_sum_liters}"
             lines.append(line)
         trees_csv = "\n".join([header] + lines)
