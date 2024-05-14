@@ -78,7 +78,7 @@ def generate_trees_csv(temp_dir, db_conn):
         logging.info(f"Creating trees.csv file for {len(trees)} trees...")
 
         # Build CSV file with all trees in it
-        header = "id,lng,lat,radolan_sum,age,watering_sum,total_water_sum_liters"
+        header = "id,lat,lng,radolan_sum,age,watering_sum,total_water_sum_liters"
         lines = []
         for tree in tqdm(trees):
             id = tree[0]
