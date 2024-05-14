@@ -16,8 +16,11 @@ def get_start_end_harvest_dates(db_conn):
     with db_conn.cursor() as cur:
         cur.execute("SELECT collection_date FROM radolan_harvester WHERE id = 1")
         last_date = cur.fetchone()[0]
-        end_date = datetime.now() - timedelta(days=1)
         start_date = datetime.combine(last_date, datetime.min.time())
+        end_date = datetime.combine(
+            datetime.now() - timedelta(days=1), datetime.max.time()
+        )
+        logging.info(f"Start date: {start_date}, End date: {end_date}")
         return [start_date, end_date]
 
 
@@ -109,6 +112,26 @@ def cleanup_radolan_entries(limit_days, db_conn):
             WHERE measured_at < NOW() - INTERVAL '{} days'
             """.format(
                 limit_days
+            )
+        )
+        db_conn.commit()
+
+
+def update_harvest_dates(start_date, end_date, db_conn):
+    """Update last harvest date
+
+    Args:
+        start_date (datetime): first day of radolon data to harvest
+        end_date (datetime): last day of radolon data to harvest
+        db_conn (_type_): the database connection
+    """
+    logging.info(f"Update last harvest date...")
+    with db_conn.cursor() as cur:
+        cur.execute(
+            """
+            UPDATE radolan_harvester SET end_date = '{}', collection_date = '{}', start_date = '{}' WHERE id = 1;
+            """.format(
+                end_date, end_date, start_date
             )
         )
         db_conn.commit()
