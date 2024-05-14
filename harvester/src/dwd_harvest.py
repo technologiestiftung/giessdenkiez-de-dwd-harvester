@@ -6,6 +6,7 @@ from extract_radolan_data import extract_radolan_data_from_shapefile
 from radolan_db_utils import (
     upload_radolan_data_in_db,
     cleanup_radolan_entries,
+    update_harvest_dates,
 )
 from build_radolan_grid import build_radolan_grid
 
@@ -63,5 +64,8 @@ def harvest_dwd(
 
         # Build radolan grid based on database values
         radolan_grid = build_radolan_grid(limit_days, database_connection)
+
+        # Update end_date of latest harvest
+        _ = update_harvest_dates(start_date, end_date, database_connection)
 
         return radolan_grid
