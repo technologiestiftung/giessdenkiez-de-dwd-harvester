@@ -75,7 +75,6 @@ def generate_trees_csv(temp_dir, db_conn):
             """
         )
         trees = cur.fetchall()
-        trees = []
 
         # Get all waterings that are included in the amount of waterings for the last 30 days
         cur.execute(
