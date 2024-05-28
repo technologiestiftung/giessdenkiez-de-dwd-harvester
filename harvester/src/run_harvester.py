@@ -9,7 +9,7 @@ from dwd_harvest import harvest_dwd
 from radolan_db_utils import (
     get_start_end_harvest_dates,
 )
-from mapbox_tree_update import update_mapbox_tree_layer
+from mapbox_tree_update import update_mapbox_tree_layer, update_tree_waterings
 
 # Set up logging
 logging.basicConfig()
@@ -79,7 +79,7 @@ update_trees_in_database(radolan_grid, database_connection)
 
 # Update Mapbox layer
 if not SKIP_MAPBOX:
-    update_mapbox_tree_layer(
+    trees_watered = update_mapbox_tree_layer(
         MAPBOX_USERNAME,
         MAPBOX_TOKEN,
         MAPBOX_TILESET,
@@ -89,3 +89,6 @@ if not SKIP_MAPBOX:
         SUPABASE_SERVICE_ROLE_KEY,
         database_connection,
     )
+
+    # Update the tree waterings and flag the waterings which are now included in the mapbox layer with included_in_map_layer = TRUE
+    update_tree_waterings(trees_watered, database_connection)
