@@ -90,4 +90,5 @@ if not SKIP_MAPBOX:
         database_connection,
     )
 
+    # Update the tree waterings and flag the waterings which are now included in the mapbox layer with included_in_map_layer = TRUE
     update_tree_waterings(trees_watered, database_connection)

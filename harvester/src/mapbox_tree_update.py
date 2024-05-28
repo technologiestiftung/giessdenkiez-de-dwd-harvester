@@ -182,6 +182,16 @@ def update_tree_waterings(trees_watered, db_conn):
     print(f"Set included_in_map_layer = TRUE for {len(trees_watered)} watered trees...")
     tree_ids = [tree_watered[4] for tree_watered in trees_watered]
     with db_conn.cursor() as cur:
+        # Set included_in_map_layer = FALSE for all waterings
+        cur.execute(
+            """
+                UPDATE trees_watered SET included_in_map_layer = FALSE WHERE TRUE;
+            """,
+            (tree_ids,),
+        )
+        db_conn.commit()
+
+        # Set included_in_map_layer = FALSE for the waterings that are included in this round of the harvester
         cur.execute(
             """
                 UPDATE trees_watered SET included_in_map_layer = TRUE WHERE id = ANY (%s);
