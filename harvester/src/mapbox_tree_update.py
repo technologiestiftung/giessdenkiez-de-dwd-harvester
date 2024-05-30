@@ -58,7 +58,7 @@ def generate_trees_csv(temp_dir, db_conn):
             # WARNING: The coordinates in the database columns lat and lng are mislabeled! They mean the opposite.
             """
                 SELECT
-                    trees.id,
+                    trees.gml_id as gml_id,
                     ST_Y(geom) AS lat,
                     ST_X(geom) AS lng,
                     trees.radolan_sum,
@@ -67,11 +67,11 @@ def generate_trees_csv(temp_dir, db_conn):
                 FROM
                     trees
                 LEFT JOIN
-                    trees_watered w ON w.tree_id = trees.id AND w.timestamp >= CURRENT_DATE - INTERVAL '30 days' AND DATE_TRUNC('day', w.timestamp) < CURRENT_DATE
+                    trees_watered w ON w.gml_id = trees.gml_id AND w.timestamp >= CURRENT_DATE - INTERVAL '30 days' AND DATE_TRUNC('day', w.timestamp) < CURRENT_DATE
                 WHERE
                     ST_CONTAINS(ST_SetSRID ((SELECT ST_EXTENT (geometry) FROM radolan_geometry), 4326), trees.geom)
                 GROUP BY
-                    trees.id, trees.lat, trees.lng, trees.radolan_sum, trees.pflanzjahr;
+                    trees.gml_id, trees.lat, trees.lng, trees.radolan_sum, trees.pflanzjahr;
             """
         )
         trees = cur.fetchall()
@@ -90,7 +90,7 @@ def generate_trees_csv(temp_dir, db_conn):
         header = "id,lat,lng,radolan_sum,age,watering_sum,total_water_sum_liters"
         lines = []
         for tree in tqdm(trees):
-            id = tree[0]
+            gml_id = tree[0]
             lat = tree[1]
             lng = tree[2]
 
@@ -111,7 +111,7 @@ def generate_trees_csv(temp_dir, db_conn):
             watering_sum = float(tree[5])
             total_water_sum_liters = (radolan_sum / 10.0) + watering_sum
 
-            line = f"{id}, {lat}, {lng}, {radolan_sum}, {age}, {watering_sum}, {total_water_sum_liters}"
+            line = f"{gml_id}, {lat}, {lng}, {radolan_sum}, {age}, {watering_sum}, {total_water_sum_liters}"
             lines.append(line)
         trees_csv = "\n".join([header] + lines)
         trees_csv_full_path = os.path.join(temp_dir, "trees.csv")
