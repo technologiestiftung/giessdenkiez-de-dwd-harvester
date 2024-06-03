@@ -17,7 +17,8 @@ def get_start_end_harvest_dates(db_conn):
     with db_conn.cursor() as cur:
         # The DWD Harvester is scheduled to run at 00:01 Europe/Berlin every day
         # We want all weather data up to the day before the current day
-        now_berlin_time = pytz.timezone("Europe/Berlin")
+        berlin_tz = pytz.timezone("Europe/Berlin")
+        now_berlin_time = datetime.now(berlin_tz)
         cur.execute("SELECT collection_date FROM radolan_harvester WHERE id = 1")
         last_date = cur.fetchone()[0]
         start_date = datetime.combine(last_date, datetime.min.time())
