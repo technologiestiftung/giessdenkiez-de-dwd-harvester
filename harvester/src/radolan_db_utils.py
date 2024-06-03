@@ -2,6 +2,7 @@ import psycopg2
 from datetime import datetime
 from datetime import timedelta
 import logging
+import pytz
 
 
 def get_start_end_harvest_dates(db_conn):
@@ -14,11 +15,15 @@ def get_start_end_harvest_dates(db_conn):
     """
     logging.info(f"Getting first and last day for harvesting...")
     with db_conn.cursor() as cur:
+        # The DWD Harvester is scheduled to run at 00:01 Europe/Berlin every day
+        # We want all weather data up to the day before the current day
+        berlin_tz = pytz.timezone("Europe/Berlin")
+        now_berlin_time = datetime.now(berlin_tz)
         cur.execute("SELECT collection_date FROM radolan_harvester WHERE id = 1")
         last_date = cur.fetchone()[0]
         start_date = datetime.combine(last_date, datetime.min.time())
         end_date = datetime.combine(
-            datetime.now() - timedelta(days=1), datetime.max.time()
+            now_berlin_time - timedelta(days=1), datetime.max.time()
         )
         logging.info(f"Start date: {start_date}, End date: {end_date}")
         return [start_date, end_date]
