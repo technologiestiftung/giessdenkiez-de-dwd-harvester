@@ -89,26 +89,24 @@ def harvest_dwd_monthly_aggregation(
     Returns:
         _type_: grid of radolan data
     """
-    berlin_tz = pytz.timezone("Europe/Berlin")
+    utc_tz = pytz.timezone("UTC")
 
     for month_to_harvest in months_to_harvest:
 
+        # Get year and month from the datetime object
+        last_day_of_month = calendar.monthrange(
+            month_to_harvest.year, month_to_harvest.month
+        )[1]
+
+        # Create a new datetime object for the last day of the month
+        first_day_of_month = month_to_harvest.replace(day=1).replace(tzinfo=utc_tz)
+        last_day_of_month = datetime(
+            month_to_harvest.year, month_to_harvest.month, last_day_of_month
+        ).replace(tzinfo=utc_tz)
+
+        print(first_day_of_month, last_day_of_month)
+
         with tempfile.TemporaryDirectory() as temp_dir:
-
-            # Get year and month from the datetime object
-            last_day_of_month = calendar.monthrange(
-                month_to_harvest.year, month_to_harvest.month
-            )[1]
-
-            # Create a new datetime object for the last day of the month
-            first_day_of_month = month_to_harvest.replace(day=1).replace(
-                tzinfo=berlin_tz
-            )
-            last_day_of_month = datetime(
-                month_to_harvest.year, month_to_harvest.month, last_day_of_month
-            ).replace(tzinfo=berlin_tz)
-
-            print(first_day_of_month, last_day_of_month)
 
             # Download daily Radolan files from DWD for whole Germany
             daily_radolan_files = download_radolan_data(
@@ -148,7 +146,12 @@ def harvest_dwd_monthly_aggregation(
                         extracted_radolan_values, database_connection
                     )
 
-        aggregate_monthly_radolan_data_in_db(month_to_harvest, database_connection)
+        aggregate_monthly_radolan_data_in_db(
+            month=month_to_harvest,
+            first_harvest_day=first_day_of_month,
+            last_harvest_day=last_day_of_month,
+            db_conn=database_connection,
+        )
         _ = purge_all_radolan_entries(database_connection)
 
         return

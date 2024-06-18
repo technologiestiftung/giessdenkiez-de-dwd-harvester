@@ -15,14 +15,14 @@ def get_months_without_aggregations(db_conn, limit_months):
         _type_: array containing months without aggregations
     """
     logging.info(f"Getting months without aggregations...")
-    berlin_tz = pytz.timezone("Europe/Berlin")
-    now_berlin_time = datetime.now(berlin_tz)
+    utc_tz = pytz.timezone("UTC")
+    now_time = datetime.now(utc_tz)
     oldest_month_to_harvest = datetime.combine(
-        now_berlin_time - relativedelta(months=limit_months), datetime.min.time()
+        now_time - relativedelta(months=limit_months), datetime.min.time()
     )
-    iterate_time = oldest_month_to_harvest.replace(tzinfo=berlin_tz)
+    iterate_time = oldest_month_to_harvest.replace(tzinfo=utc_tz)
     months_to_harvest = []
-    while iterate_time < now_berlin_time:
+    while iterate_time < now_time:
         months_to_harvest.append(iterate_time.replace(day=1))
         iterate_time = iterate_time + relativedelta(months=1)
 
@@ -110,12 +110,11 @@ def aggregate_monthly_radolan_data_in_db(
         res = cur.fetchone()[0]
         print(res)
         cur.execute(
-            """
-                    INSERT INTO radolan_monthly_aggregations (harvest_month, first_harvest_day, last_harvest_day, harvesting_finished, precipitation)
-                    VALUES (%s, %s, %s, %s, %s);
-                    """.format(
-                month, first_harvest_day, last_harvest_day, True, res
-            )
+            f"""
+                INSERT INTO monthly_aggregated_radolan_data (harvest_month, first_harvest_day, last_harvest_day, harvesting_finished, precipitation)
+                VALUES (%s, %s, %s, %s, %s);
+            """,
+            (month, first_harvest_day, last_harvest_day, True, res),
         )
         db_conn.commit()
 
