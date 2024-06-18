@@ -3,6 +3,30 @@ from datetime import datetime
 from datetime import timedelta
 import logging
 import pytz
+from dateutil.relativedelta import relativedelta
+
+
+def get_months_without_aggregations(db_conn, limit_months):
+    """Gets months without aggregations
+
+    Args:
+        db_conn (_type_): the database connection
+    Returns:
+        _type_: array containing months without aggregations
+    """
+    logging.info(f"Getting months without aggregations...")
+    berlin_tz = pytz.timezone("Europe/Berlin")
+    now_berlin_time = datetime.now(berlin_tz)
+    oldest_month_to_harvest = datetime.combine(
+        now_berlin_time - relativedelta(months=limit_months), datetime.min.time()
+    )
+    iterate_time = oldest_month_to_harvest.replace(tzinfo=berlin_tz)
+    months_to_harvest = []
+    while iterate_time < now_berlin_time:
+        months_to_harvest.append(iterate_time.replace(day=1))
+        iterate_time = iterate_time + relativedelta(months=1)
+
+    return months_to_harvest
 
 
 def get_start_end_harvest_dates(db_conn):
@@ -58,6 +82,44 @@ def upload_radolan_data_in_db(extracted_radolan_values, db_conn):
         db_conn.commit()
 
 
+def aggregate_monthly_radolan_data_in_db(
+    month, first_harvest_day, last_harvest_day, db_conn
+):
+    """Aggregates monthly radolon data in database
+
+    Args:
+        month (_type_): the month to aggregate the extracted radolan values for
+        db_conn (_type_): the database connection
+    """
+    logging.info(f"Aggregating radolan data for {month}...")
+    with db_conn.cursor() as cur:
+        cur.execute(
+            """
+            SELECT
+                avg(sum_rain.avg_rain) as avg_rain_aggregated
+            FROM (
+                SELECT
+                    geom_id,
+                    sum(value) AS avg_rain
+                FROM
+                    radolan_data
+                GROUP BY
+                    geom_id) AS sum_rain;
+                    """
+        )
+        res = cur.fetchone()[0]
+        print(res)
+        cur.execute(
+            """
+                    INSERT INTO radolan_monthly_aggregations (harvest_month, first_harvest_day, last_harvest_day, harvesting_finished, precipitation)
+                    VALUES (%s, %s, %s, %s, %s);
+                    """.format(
+                month, first_harvest_day, last_harvest_day, True, res
+            )
+        )
+        db_conn.commit()
+
+
 def update_trees_in_database(radolan_grid, db_conn):
     """Updates tree radolon data in database
 
@@ -88,6 +150,22 @@ def update_trees_in_database(radolan_grid, db_conn):
             AND ST_CoveredBy(geom, ST_Buffer(ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326), 0.0002));
             """,
             radolan_grid,
+        )
+        db_conn.commit()
+
+
+def purge_all_radolan_entries(db_conn):
+    """Purge all radolon data in database
+
+    Args:
+        db_conn (_type_): the database connection
+    """
+    logging.info(f"Cleanup old and duplicated datat in database...")
+    with db_conn.cursor() as cur:
+        cur.execute(
+            """
+            DELETE FROM radolan_data where true;
+            """
         )
         db_conn.commit()
 
