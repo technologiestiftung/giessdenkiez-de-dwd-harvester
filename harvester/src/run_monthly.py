@@ -64,9 +64,14 @@ for date in date_list:
     response = requests.get(url, params=params, headers=headers)
     weather_raw = response.json()
     weather = weather_raw["weather"]
-    interesting_weather = [(x["precipitation"], x["temperature"]) for x in weather]
-    precipitation_sum_mm_per_sqm = sum([x[0] for x in interesting_weather])
-    temperature_avg = sum([x[1] for x in interesting_weather]) / len(
+    interesting_weather = [
+        {"precipitation": x["precipitation"], "temperature": x["temperature"]}
+        for x in weather
+    ]
+    precipitation_sum_mm_per_sqm = sum(
+        [x["precipitation"] for x in interesting_weather]
+    )
+    temperature_avg = sum([x["temperature"] for x in interesting_weather]) / len(
         interesting_weather
     )
     with database_connection.cursor() as cur:
