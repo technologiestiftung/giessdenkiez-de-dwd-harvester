@@ -170,6 +170,8 @@ def harvest_dwd_monthly_aggregation(
             # Purge only if the month is not the current month of the current year
             now = datetime.now(utc_tz)
             if month_to_harvest[0] != now.month and month_to_harvest[1] != now.year:
-                _ = purge_all_monthly_radolan_entries(database_connection)
+                _ = purge_all_monthly_radolan_entries(
+                    now.month, now.year, database_connection
+                )
 
     return

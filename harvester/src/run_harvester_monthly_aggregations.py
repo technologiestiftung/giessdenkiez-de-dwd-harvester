@@ -45,7 +45,7 @@ except:
 
 # Start harvesting DWD data
 months_to_harvest = get_months_without_aggregations(
-    limit_months=1, db_conn=database_connection
+    limit_months=2, db_conn=database_connection
 )
 
 radolan_grid = harvest_dwd_monthly_aggregation(

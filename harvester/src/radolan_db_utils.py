@@ -235,7 +235,7 @@ def update_trees_in_database(radolan_grid, db_conn):
         db_conn.commit()
 
 
-def purge_all_monthly_radolan_entries(db_conn):
+def purge_all_monthly_radolan_entries(now_month, now_year, db_conn):
     """Purge all radolon data in database
 
     Args:
@@ -245,8 +245,9 @@ def purge_all_monthly_radolan_entries(db_conn):
     with db_conn.cursor() as cur:
         cur.execute(
             """
-            DELETE FROM monthly_radolan_data_temp where true;
-            """
+            DELETE FROM monthly_radolan_data_temp where DATE_PART('month', measured_at) != %s AND DATE_PART('year', measured_at) != %s;
+            """,
+            [now_month, now_year],
         )
         db_conn.commit()
 
