@@ -12,6 +12,11 @@ import shutil
 url = f"https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/recent/asc"
 
 
+def historical_url(year, month):
+    # e.g. https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/historical/asc/2023/RW-202301.tar
+    return f"https://opendata.dwd.de/climate_environment/CDC/grids_germany/hourly/radolan/historical/asc/{year}/RW-{year}{month:02}.tar"
+
+
 def download_radolan_data(start_date, end_date, path):
     """Download Radolan data from DWD
     Args:
@@ -26,13 +31,51 @@ def download_radolan_data(start_date, end_date, path):
         date_str = start_date.strftime("%Y%m%d")
         file_name = f"RW-{date_str}.tar.gz"
         download_url = f"{url}/{file_name}"
+        historical_download_url = historical_url(start_date.year, start_date.month)
         dest_file = os.path.join(path, file_name)
         try:
             urllib.request.urlretrieve(download_url, dest_file)
             downloaded_files.append(dest_file)
-            logging.info(f"Downloading {download_url}...")
+            logging.info(f"Downloaded {download_url}...")
         except Exception as e:
-            logging.info(f"Skipping download {download_url}: {e}")
+
+            # try historical url
+            try:
+                logging.info(
+                    f"Recent data not found, trying historical download url..."
+                )
+                month_dest_folder = os.path.join(
+                    path,
+                    f"RW-{start_date.year}{start_date.month:02}",
+                )
+                os.makedirs(month_dest_folder, exist_ok=True)
+
+                month_file_name = f"RW-{start_date.year}{start_date.month:02}.tar"
+                day_file_name = f"RW-{start_date.year}{start_date.month:02}{start_date.day:02}.tar.gz"
+                month_dest_file = os.path.join(month_dest_folder, month_file_name)
+
+                if os.path.isfile(month_dest_file):
+                    logging.info(f"File already exists: {month_dest_file}")
+                else:
+                    urllib.request.urlretrieve(historical_download_url, month_dest_file)
+                    logging.info(f"Downloaded {historical_download_url}...")
+
+                with tarfile.open(month_dest_file, "r") as tar:
+                    logging.info(f"Extracting {day_file_name}...")
+                    tar.extract(
+                        member=day_file_name,
+                        path=month_dest_folder,
+                    )
+                    day_dest_file = os.path.join(month_dest_folder, day_file_name)
+                    downloaded_files.append(day_dest_file)
+                    tar.close()
+
+                if start_date + timedelta(days=1) > end_date:
+                    os.remove(month_dest_file)
+
+            except Exception as e:
+                logging.info(f"Skipping download {historical_download_url}: {e}")
+
         finally:
             start_date += timedelta(days=1)
 

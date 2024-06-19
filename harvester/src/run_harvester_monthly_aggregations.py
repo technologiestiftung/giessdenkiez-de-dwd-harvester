@@ -65,7 +65,9 @@ except:
     sys.exit(1)
 
 # Start harvesting DWD data
-months_to_harvest = get_months_without_aggregations(database_connection, 1)
+months_to_harvest = get_months_without_aggregations(
+    limit_months=1, db_conn=database_connection
+)
 print(months_to_harvest)
 
 radolan_grid = harvest_dwd_monthly_aggregation(

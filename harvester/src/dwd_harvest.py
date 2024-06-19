@@ -5,13 +5,13 @@ from project_radolan_data import project_radolan_data, polygonize_data
 from extract_radolan_data import extract_radolan_data_from_shapefile
 from radolan_db_utils import (
     aggregate_monthly_radolan_data_in_db,
-    purge_all_radolan_entries,
+    get_first_and_last_day_for_harvest_round,
+    purge_all_monthly_radolan_entries,
     upload_radolan_data_in_db,
     cleanup_radolan_entries,
     update_harvest_dates,
 )
 from build_radolan_grid import build_radolan_grid
-import calendar
 import pytz
 
 
@@ -61,7 +61,11 @@ def harvest_dwd(
                 )
 
                 # Update Radolan data in DB
-                upload_radolan_data_in_db(extracted_radolan_values, database_connection)
+                upload_radolan_data_in_db(
+                    extracted_radolan_values=extracted_radolan_values,
+                    table_name="radolan_data",
+                    db_conn=database_connection,
+                )
 
         # After all database inserts, cleanup db
         _ = cleanup_radolan_entries(limit_days, database_connection)
@@ -93,33 +97,39 @@ def harvest_dwd_monthly_aggregation(
 
     for month_to_harvest in months_to_harvest:
 
-        # Get year and month from the datetime object
-        last_day_of_month = calendar.monthrange(
-            month_to_harvest.year, month_to_harvest.month
-        )[1]
+        (
+            first_harvest_day_for_this_round,
+            last_harvest_day_for_this_round,
+            last_day_of_month,
+        ) = get_first_and_last_day_for_harvest_round(
+            month_to_harvest[0], month_to_harvest[1], database_connection
+        )
 
-        # Create a new datetime object for the last day of the month
-        first_day_of_month = month_to_harvest.replace(day=1).replace(tzinfo=utc_tz)
-        last_day_of_month = datetime(
-            month_to_harvest.year, month_to_harvest.month, last_day_of_month
-        ).replace(tzinfo=utc_tz)
-
-        print(first_day_of_month, last_day_of_month)
+        print(
+            f"Harvesting data for {month_to_harvest}, starting at {first_harvest_day_for_this_round} up to {last_harvest_day_for_this_round}..."
+        )
 
         with tempfile.TemporaryDirectory() as temp_dir:
 
             # Download daily Radolan files from DWD for whole Germany
             daily_radolan_files = download_radolan_data(
-                first_day_of_month, last_day_of_month, temp_dir
+                first_harvest_day_for_this_round,
+                last_harvest_day_for_this_round,
+                temp_dir,
             )
 
             # Extract downloaded daily Radolan files into hourly Radolan data files
             hourly_radolan_files = unzip_radolan_data(daily_radolan_files, temp_dir)
 
+            print(
+                f"Processing {len(hourly_radolan_files)} hourly files for {month_to_harvest[0]}-{month_to_harvest[1]}..."
+            )
+
             # Process all hourly Radolan files
             for hourly_radolan_file in hourly_radolan_files:
 
                 filename = hourly_radolan_file.split("/")[-1]
+
                 measured_at_timestamp = datetime.strptime(
                     filename, "RW_%Y%m%d-%H%M.asc"
                 )
@@ -143,15 +153,23 @@ def harvest_dwd_monthly_aggregation(
 
                     # Update Radolan data in DB
                     upload_radolan_data_in_db(
-                        extracted_radolan_values, database_connection
+                        extracted_radolan_values=extracted_radolan_values,
+                        table_name="monthly_radolan_data_temp",
+                        db_conn=database_connection,
                     )
 
-        aggregate_monthly_radolan_data_in_db(
-            month=month_to_harvest,
-            first_harvest_day=first_day_of_month,
-            last_harvest_day=last_day_of_month,
-            db_conn=database_connection,
-        )
-        _ = purge_all_radolan_entries(database_connection)
+        if len(hourly_radolan_files) > 0:
+            aggregate_monthly_radolan_data_in_db(
+                month=month_to_harvest[0],
+                year=month_to_harvest[1],
+                last_harvest_day=last_harvest_day_for_this_round.day,
+                finished=last_harvest_day_for_this_round.day == last_day_of_month.day,
+                db_conn=database_connection,
+            )
 
-        return
+            # Purge only if the month is not the current month of the current year
+            now = datetime.now(utc_tz)
+            if month_to_harvest[0] != now.month and month_to_harvest[1] != now.year:
+                _ = purge_all_monthly_radolan_entries(database_connection)
+
+    return
