@@ -4,12 +4,8 @@ import psycopg2
 from dotenv import load_dotenv
 import logging
 import os
-from radolan_db_utils import get_months_without_aggregations, update_trees_in_database
-from dwd_harvest import harvest_dwd, harvest_dwd_monthly_aggregation
-from radolan_db_utils import (
-    get_start_end_harvest_dates,
-)
-from mapbox_tree_update import update_mapbox_tree_layer, update_tree_waterings
+from radolan_db_utils import get_months_without_aggregations
+from dwd_harvest import harvest_dwd_monthly_aggregation
 
 # Set up logging
 logging.basicConfig()
@@ -24,29 +20,12 @@ for env_var in [
     "PG_PORT",
     "PG_USER",
     "PG_PASS",
-    "SUPABASE_URL",
-    "SUPABASE_BUCKET_NAME",
-    "SUPABASE_SERVICE_ROLE_KEY",
-    "LIMIT_DAYS",
-    "MAPBOXUSERNAME",
-    "MAPBOXTOKEN",
-    "MAPBOXTILESET",
-    "MAPBOXLAYERNAME",
     "SURROUNDING_SHAPE_FILE",
 ]:
     if env_var not in os.environ:
         logging.error("❌Environmental Variable {} does not exist".format(env_var))
         sys.exit(1)
 
-SUPABASE_URL = os.getenv("SUPABASE_URL")
-SUPABASE_BUCKET_NAME = os.getenv("SUPABASE_BUCKET_NAME")
-SUPABASE_SERVICE_ROLE_KEY = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
-LIMIT_DAYS = int(os.getenv("LIMIT_DAYS"))
-SKIP_MAPBOX = os.getenv("SKIP_MAPBOX") == "True"
-MAPBOX_USERNAME = os.getenv("MAPBOXUSERNAME")
-MAPBOX_TOKEN = os.getenv("MAPBOXTOKEN")
-MAPBOX_TILESET = os.getenv("MAPBOXTILESET")
-MAPBOX_LAYERNAME = os.getenv("MAPBOXLAYERNAME")
 PG_SERVER = os.getenv("PG_SERVER")
 PG_PORT = os.getenv("PG_PORT")
 PG_USER = os.getenv("PG_USER")
@@ -68,7 +47,6 @@ except:
 months_to_harvest = get_months_without_aggregations(
     limit_months=1, db_conn=database_connection
 )
-print(months_to_harvest)
 
 radolan_grid = harvest_dwd_monthly_aggregation(
     surrounding_shape_file=SURROUNDING_SHAPE_FILE,

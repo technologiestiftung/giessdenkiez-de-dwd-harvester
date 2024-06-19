@@ -81,7 +81,7 @@ def get_months_without_aggregations(limit_months: int, db_conn):
 
     iterate_time = oldest_month_to_harvest
     months_to_harvest = []
-    print(iterate_time, now_time)
+
     while iterate_time < now_time:
         first_day_of_iterate_time = iterate_time.replace(day=1)
         iterate_year = first_day_of_iterate_time.year
@@ -92,7 +92,7 @@ def get_months_without_aggregations(limit_months: int, db_conn):
                 [iterate_month, iterate_year],
             )
             existing_aggregation = cur.fetchone()
-            print(existing_aggregation)
+
             if existing_aggregation == None:
                 cur.execute(
                     "INSERT INTO monthly_aggregated_radolan_data (month, year, harvesting_finished) VALUES (%s, %s, %s);",
@@ -106,6 +106,7 @@ def get_months_without_aggregations(limit_months: int, db_conn):
 
         iterate_time = iterate_time + relativedelta(months=1)
 
+    logging.info(f"Months to harvest: {months_to_harvest}")
     return months_to_harvest
 
 
