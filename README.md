@@ -112,6 +112,22 @@ Make sure to set the environment variables properly before running the script. M
   - Preprocess trees.csv using `tippecanoe` library.
   - Start the creation of updated Mapbox layer
 
+### 4. Harvesting daily weather data
+For harvesting daily weather data, we use the free and open source [BrightSky API](https://brightsky.dev/docs/#/). No API key is needed. The script is defined in [run_daily_weather.py](harvester/src/run_daily_weather.py).
+Make sure to set all relevant environment variables before running the script, e.g. for a run with local database attached:
+
+```
+PG_SERVER=localhost
+PG_PORT=54322
+PG_USER=postgres
+PG_DB=postgres
+PG_PASS=postgres
+WEATHER_HARVEST_LAT=52.520008
+WEATHER_HARVEST_LNG=13.404954
+```
+
+Make sure that especially `WEATHER_HARVEST_LAT` and `WEATHER_HARVEST_LNG` are set to your destination of interest.
+
 ## Docker
 
 To have a local database for testing you need Docker and docker-compose installed. You will also have to create a public Supabase Storage bucket. You also need to update the `.env` file with the values from `sample.env` below the line `# for your docker environment`.

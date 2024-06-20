@@ -20,6 +20,8 @@ for env_var in [
     "PG_PORT",
     "PG_USER",
     "PG_PASS",
+    "WEATHER_HARVEST_LAT",
+    "WEATHER_HARVEST_LNG",
 ]:
     if env_var not in os.environ:
         logging.error("❌Environmental Variable {} does not exist".format(env_var))
@@ -30,6 +32,8 @@ PG_PORT = os.getenv("PG_PORT")
 PG_USER = os.getenv("PG_USER")
 PG_PASS = os.getenv("PG_PASS")
 PG_DB = os.getenv("PG_DB")
+WEATHER_HARVEST_LAT = os.getenv("WEATHER_HARVEST_LAT")
+WEATHER_HARVEST_LNG = os.getenv("WEATHER_HARVEST_LNG")
 
 # Establish database connection
 try:
@@ -87,8 +91,8 @@ for date in date_list:
     url = "https://api.brightsky.dev/weather"
     params = {
         "date": full_day,
-        "lat": 52.520008,
-        "lon": 13.404954,
+        "lat": WEATHER_HARVEST_LAT,
+        "lon": WEATHER_HARVEST_LNG,
     }
     headers = {"Accept": "application/json"}
     response = requests.get(url, params=params, headers=headers)
