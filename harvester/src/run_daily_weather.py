@@ -67,7 +67,7 @@ def extract(weather_list, field):
 print(f"📅 Fetching weather data for {len(date_list)} days...")
 weather_days_in_db = []
 with database_connection.cursor() as cur:
-    cur.execute("SELECT * FROM daily_weather_data;")
+    cur.execute("SELECT measure_day, day_finished FROM daily_weather_data;")
     weather_days_in_db = cur.fetchall()
 
 for date in date_list:
@@ -75,11 +75,11 @@ for date in date_list:
     full_day = date
 
     existing_weather_in_db_for_this_day = [
-        x for x in weather_days_in_db if x[1].date() == full_day
+        x for x in weather_days_in_db if x[0].date() == full_day
     ]
     if existing_weather_in_db_for_this_day != []:
         logging.info(f"🌦 Weather data for {full_day} already exists in the database...")
-        if existing_weather_in_db_for_this_day[0][2] == False:
+        if existing_weather_in_db_for_this_day[0][1] == False:
             logging.info(
                 f"🌦 Weather data for {full_day} was not finished in last run, updating now..."
             )
