@@ -31,4 +31,4 @@ COPY . /app/
 
 RUN cd /app/prepare && SHAPE_RESTORE_SHX=YES python create-buffer.py
 
-CMD ./app/run_harvest.sh
+CMD /app/run_harvest.sh
