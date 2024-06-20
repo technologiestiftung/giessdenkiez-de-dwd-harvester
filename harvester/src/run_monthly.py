@@ -63,6 +63,7 @@ for date in date_list:
     headers = {"Accept": "application/json"}
     response = requests.get(url, params=params, headers=headers)
     weather_raw = response.json()
+    print(json.dumps(weather_raw)
     weather = weather_raw["weather"]
     interesting_weather = [
         {"precipitation": x["precipitation"], "temperature": x["temperature"]}
@@ -81,3 +82,4 @@ for date in date_list:
         )
     database_connection.commit()
     print(full_day, temperature_avg, precipitation_sum_mm_per_sqm)
+    exit(1)

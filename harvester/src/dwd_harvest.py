@@ -158,20 +158,21 @@ def harvest_dwd_monthly_aggregation(
                         db_conn=database_connection,
                     )
 
-        if len(hourly_radolan_files) > 0:
-            aggregate_monthly_radolan_data_in_db(
-                month=month_to_harvest[0],
-                year=month_to_harvest[1],
-                last_harvest_day=last_harvest_day_for_this_round.day,
-                finished=last_harvest_day_for_this_round.day == last_day_of_month.day,
-                db_conn=database_connection,
-            )
-
-            # Purge only if the month is not the current month of the current year
-            now = datetime.now(utc_tz)
-            if month_to_harvest[0] != now.month and month_to_harvest[1] != now.year:
-                _ = purge_all_monthly_radolan_entries(
-                    now.month, now.year, database_connection
+            if len(hourly_radolan_files) > 0:
+                aggregate_monthly_radolan_data_in_db(
+                    month=month_to_harvest[0],
+                    year=month_to_harvest[1],
+                    last_harvest_day=last_harvest_day_for_this_round.day,
+                    finished=last_harvest_day_for_this_round.day
+                    == last_day_of_month.day,
+                    db_conn=database_connection,
                 )
+
+                # Purge only if the month is not the current month of the current year
+                now = datetime.now(utc_tz)
+                if month_to_harvest[0] != now.month and month_to_harvest[1] != now.year:
+                    _ = purge_all_monthly_radolan_entries(
+                        now.month, now.year, database_connection
+                    )
 
     return

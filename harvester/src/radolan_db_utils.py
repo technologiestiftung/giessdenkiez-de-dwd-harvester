@@ -1,113 +1,8 @@
-import calendar
 import psycopg2
-from datetime import datetime, time
+from datetime import datetime
 from datetime import timedelta
 import logging
 import pytz
-from dateutil.relativedelta import relativedelta
-
-
-def get_first_and_last_day_for_harvest_round(month: int, year: int, db_conn):
-    utc_tz = pytz.timezone("UTC")
-
-    # Check if aggregation exists
-    existing_aggregation = get_existing_month_aggregation(month, year, db_conn)
-    last_harvest_day_in_db = existing_aggregation[3] if existing_aggregation else None
-
-    # Get year and month from the datetime object
-    last_day_of_month_number = calendar.monthrange(year, month)[1]
-
-    last_day_of_month = datetime(year, month, last_day_of_month_number).replace(
-        tzinfo=utc_tz
-    )
-
-    # Create a new datetime object for the last day of the month
-    first_harvest_day_for_this_round = datetime(year, month, 1).replace(tzinfo=utc_tz)
-    last_harvest_day_for_this_round = last_day_of_month
-
-    # If the last harvest day in the DB is smaller than the last day of the month, start from the last harvest day
-    if last_harvest_day_in_db != None and (
-        last_harvest_day_in_db < last_day_of_month_number
-    ):
-        first_harvest_day_for_this_round = datetime(
-            year, month, last_harvest_day_in_db + 1
-        ).replace(tzinfo=utc_tz)
-
-    # If the last day of the month is in the future, set it to yesterday (because the data for today is not available yet)
-    if datetime.now(utc_tz) < last_day_of_month:
-        last_harvest_day_for_this_round = datetime.combine(
-            datetime.now(utc_tz) - timedelta(days=1), time(23, 59, 59)
-        ).replace(tzinfo=utc_tz)
-
-    if last_harvest_day_for_this_round < first_harvest_day_for_this_round:
-        last_harvest_day_for_this_round = first_harvest_day_for_this_round
-
-    return (
-        first_harvest_day_for_this_round,
-        last_harvest_day_for_this_round,
-        last_day_of_month,
-    )
-
-
-def get_existing_month_aggregation(month: int, year: int, db_conn):
-    logging.info(f"Getting existing month aggregation for {month}-{year}...")
-    with db_conn.cursor() as cur:
-        cur.execute(
-            "SELECT * FROM monthly_aggregated_radolan_data WHERE month = %s AND year = %s",
-            [month, year],
-        )
-        aggregation = cur.fetchone()
-
-        if aggregation == None:
-            return None
-
-        return aggregation
-
-
-def get_months_without_aggregations(limit_months: int, db_conn):
-    """Gets months without aggregations
-
-    Args:
-        db_conn (_type_): the database connection
-    Returns:
-        _type_: array containing months without aggregations
-    """
-    logging.info(f"Getting months without aggregations...")
-    utc_tz = pytz.timezone("UTC")
-    now_time = datetime.now(utc_tz)
-    oldest_month_to_harvest = datetime.combine(
-        now_time - relativedelta(months=limit_months), datetime.min.time()
-    ).replace(tzinfo=utc_tz)
-
-    iterate_time = oldest_month_to_harvest
-    months_to_harvest = []
-
-    while iterate_time < now_time:
-        first_day_of_iterate_time = iterate_time.replace(day=1)
-        iterate_year = first_day_of_iterate_time.year
-        iterate_month = first_day_of_iterate_time.month
-        with db_conn.cursor() as cur:
-            cur.execute(
-                "SELECT * FROM monthly_aggregated_radolan_data WHERE month = %s AND year = %s;",
-                [iterate_month, iterate_year],
-            )
-            existing_aggregation = cur.fetchone()
-
-            if existing_aggregation == None:
-                cur.execute(
-                    "INSERT INTO monthly_aggregated_radolan_data (month, year, harvesting_finished) VALUES (%s, %s, %s);",
-                    [iterate_month, iterate_year, False],
-                )
-                db_conn.commit()
-                months_to_harvest.append((iterate_month, iterate_year))
-            else:
-                if existing_aggregation[6] == False:
-                    months_to_harvest.append((iterate_month, iterate_year))
-
-        iterate_time = iterate_time + relativedelta(months=1)
-
-    logging.info(f"Months to harvest: {months_to_harvest}")
-    return months_to_harvest
 
 
 def get_start_end_harvest_dates(db_conn):
@@ -241,11 +136,13 @@ def purge_all_monthly_radolan_entries(now_month, now_year, db_conn):
     Args:
         db_conn (_type_): the database connection
     """
-    logging.info(f"Purge all monthly radolon data in database...")
+    logging.info(
+        f"Purge all monthly radolon data in database for {now_month}-{now_year}..."
+    )
     with db_conn.cursor() as cur:
         cur.execute(
             """
-            DELETE FROM monthly_radolan_data_temp where DATE_PART('month', measured_at) != %s AND DATE_PART('year', measured_at) != %s;
+            DELETE FROM monthly_radolan_data_temp where DATE_PART('month', measured_at) != %s or DATE_PART('year', measured_at) != %s;
             """,
             [now_month, now_year],
         )
