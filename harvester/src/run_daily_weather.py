@@ -88,6 +88,8 @@ for date in date_list:
         else:
             continue
 
+    # Using BrightSky API to fetch weather data https://brightsky.dev/docs/#/
+    # Hint: No API key is required
     url = "https://api.brightsky.dev/weather"
     params = {
         "date": full_day,
