@@ -1,12 +1,12 @@
 #!/bin/sh
 set -e
 
-python ./src/run_daily_weather.py || {
+python /app/src/run_daily_weather.py || {
     echo "run_daily_weather.py failed"
     FAILED=1
 }
 
-python ./src/run_harvester.py || {
+python /app/src/run_harvester.py || {
     echo "run_harvester.py failed"
     FAILED=1
 }
