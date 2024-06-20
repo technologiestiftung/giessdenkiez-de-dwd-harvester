@@ -61,7 +61,11 @@ date_list = [
 
 
 def extract(weather_list, field):
-    return [x[field] for x in weather_list if x[field] is not None]
+    return [
+        data_point[field]
+        for data_point in weather_list
+        if data_point[field] is not None
+    ]
 
 
 print(f"📅 Fetching weather data for {len(date_list)} days...")
@@ -75,7 +79,9 @@ for date in date_list:
     full_day = date
 
     existing_weather_in_db_for_this_day = [
-        x for x in weather_days_in_db if x[0].date() == full_day
+        data_point_in_db
+        for data_point_in_db in weather_days_in_db
+        if data_point_in_db[0].date() == full_day
     ]
     if existing_weather_in_db_for_this_day != []:
         logging.info(f"🌦 Weather data for {full_day} already exists in the database...")
