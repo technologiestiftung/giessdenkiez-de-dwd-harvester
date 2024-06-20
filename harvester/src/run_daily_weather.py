@@ -18,10 +18,11 @@ load_dotenv()
 
 # Check if all required environmental variables are accessible
 for env_var in [
-    "PG_DB",
+    "PG_SERVER",
     "PG_PORT",
     "PG_USER",
     "PG_PASS",
+    "PG_DB",
     "WEATHER_HARVEST_LAT",
     "WEATHER_HARVEST_LNG",
 ]:
