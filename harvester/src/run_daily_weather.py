@@ -147,4 +147,5 @@ for date in date_list:
                 source_dwd_station_ids,
             ],
         )
-    database_connection.commit()
+
+database_connection.commit()
