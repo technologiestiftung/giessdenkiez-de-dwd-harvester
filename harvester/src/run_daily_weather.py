@@ -6,6 +6,7 @@ import logging
 import os
 import requests
 import datetime
+from weather_utils import extract
 
 # This script fetches hourly weather data from the BrightSky API, aggregates it to daily weather data and stores it in the database
 
@@ -40,8 +41,9 @@ WEATHER_HARVEST_LNG = os.getenv("WEATHER_HARVEST_LNG")
 
 # Establish database connection
 try:
-    database_connection_str = f"host='{PG_SERVER}' port={PG_PORT} user='{PG_USER}' password='{PG_PASS}' dbname='{PG_DB}'"
-    database_connection = psycopg2.connect(database_connection_str)
+    database_connection = psycopg2.connect(
+        dbname=PG_DB, user=PG_USER, password=PG_PASS, host=PG_SERVER, port=PG_PORT
+    )
     logging.info("🗄 Database connection established")
 except:
     logging.error("❌Could not establish database connection")
@@ -59,15 +61,6 @@ date_list = [
     for x in range((today - one_year_ago).days + 1)
 ]
 
-
-def extract(weather_list, field):
-    return [
-        data_point[field]
-        for data_point in weather_list
-        if data_point[field] is not None
-    ]
-
-
 print(f"📅 Fetching weather data for {len(date_list)} days...")
 weather_days_in_db = []
 with database_connection.cursor() as cur:
@@ -76,18 +69,17 @@ with database_connection.cursor() as cur:
 
 for date in date_list:
     today = datetime.date.today()
-    full_day = date
 
     existing_weather_in_db_for_this_day = [
         data_point_in_db
         for data_point_in_db in weather_days_in_db
-        if data_point_in_db[0].date() == full_day
+        if data_point_in_db[0].date() == date
     ]
     if existing_weather_in_db_for_this_day != []:
-        logging.info(f"🌦 Weather data for {full_day} already exists in the database...")
+        logging.info(f"🌦 Weather data for {date} already exists in the database...")
         if existing_weather_in_db_for_this_day[0][1] == False:
             logging.info(
-                f"🌦 Weather data for {full_day} was not finished in last run, updating now..."
+                f"🌦 Weather data for {date} was not finished in last run, updating now..."
             )
             with database_connection.cursor() as cur:
                 cur.execute(
@@ -101,7 +93,7 @@ for date in date_list:
     # Hint: No API key is required
     url = "https://api.brightsky.dev/weather"
     params = {
-        "date": full_day,
+        "date": date,
         "lat": WEATHER_HARVEST_LAT,
         "lon": WEATHER_HARVEST_LNG,
     }
@@ -130,15 +122,15 @@ for date in date_list:
 
     source_dwd_station_ids = extract(weather_raw["sources"], "dwd_station_id")
 
-    day_finished = full_day < today
+    day_finished = date < today
 
-    logging.info(f"🌦 Weather data for {full_day} fetched via BrightySky API...")
+    logging.info(f"🌦 Weather data for {date} fetched via BrightySky API...")
 
     with database_connection.cursor() as cur:
         cur.execute(
             "INSERT INTO daily_weather_data (measure_day, day_finished, sum_precipitation_mm_per_sqm, avg_temperature_celsius, avg_pressure_msl, sum_sunshine_minutes, avg_wind_direction_deg, avg_wind_speed_kmh, avg_cloud_cover_percentage, avg_dew_point_celcius, avg_relative_humidity_percentage, avg_visibility_m, avg_wind_gust_direction_deg, avg_wind_gust_speed_kmh, source_dwd_station_ids) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
             [
-                full_day,
+                date,
                 day_finished,
                 sum_precipitation_mm_per_sqm,
                 avg_temperature_celsius,
