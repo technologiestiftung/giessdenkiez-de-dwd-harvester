@@ -7,6 +7,8 @@ import os
 import requests
 import datetime
 
+# This script fetches hourly weather data from the BrightSky API, aggregates it to daily weather data and stores it in the database
+
 # Set up logging
 logging.basicConfig()
 logging.root.setLevel(logging.INFO)
