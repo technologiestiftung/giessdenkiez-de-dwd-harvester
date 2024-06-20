@@ -29,6 +29,8 @@ env:
   MAPBOXLAYERNAME: "abc"
   LOGGING: INFO
   SKIP_MAPBOX: "True"
+  WEATHER_HARVEST_LAT: "52.520008"
+  WEATHER_HARVEST_LNG: "13.404954"
   # DATABASE_URL: postgresql://fangorn:ent@localhost:5432/trees?schema=public
 
 jobs:
