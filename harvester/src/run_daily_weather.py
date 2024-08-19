@@ -53,7 +53,7 @@ except:
 today = datetime.date.today()
 
 # Calculate the date one year ago
-one_year_ago = today - datetime.timedelta(days=365)
+one_year_ago = today - datetime.timedelta(days=3 * 365)
 
 # Generate a list of all dates between one year ago and today
 date_list = [
