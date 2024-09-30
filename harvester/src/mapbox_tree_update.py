@@ -63,7 +63,7 @@ def generate_trees_csv(temp_dir, db_conn):
                     ST_X(geom) AS lng,
                     trees.radolan_sum,
                     trees.pflanzjahr,
-                    COALESCE(SUM(w.amount), 0) AS watering_sum
+                    COALESCE(SUM(w.amount), 0) AS watering_sum,
                     trees.bezirk as district
                 FROM
                     trees
@@ -72,7 +72,7 @@ def generate_trees_csv(temp_dir, db_conn):
                 WHERE
                     ST_CONTAINS(ST_SetSRID ((SELECT ST_EXTENT (geometry) FROM radolan_geometry), 4326), trees.geom)
                 GROUP BY
-                    trees.id, trees.lat, trees.lng, trees.radolan_sum, trees.pflanzjahr;
+                    trees.id, trees.lat, trees.lng, trees.radolan_sum, trees.pflanzjahr, trees.b    ezirk;
             """
         )
         trees = cur.fetchall()
