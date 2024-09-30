@@ -63,7 +63,8 @@ def generate_trees_csv(temp_dir, db_conn):
                     ST_X(geom) AS lng,
                     trees.radolan_sum,
                     trees.pflanzjahr,
-                    COALESCE(SUM(w.amount), 0) AS watering_sum
+                    COALESCE(SUM(w.amount), 0) AS watering_sum,
+                    trees.bezirk as district
                 FROM
                     trees
                 LEFT JOIN
@@ -71,7 +72,7 @@ def generate_trees_csv(temp_dir, db_conn):
                 WHERE
                     ST_CONTAINS(ST_SetSRID ((SELECT ST_EXTENT (geometry) FROM radolan_geometry), 4326), trees.geom)
                 GROUP BY
-                    trees.id, trees.lat, trees.lng, trees.radolan_sum, trees.pflanzjahr;
+                    trees.id, trees.lat, trees.lng, trees.radolan_sum, trees.pflanzjahr, trees.bezirk;
             """
         )
         trees = cur.fetchall()
@@ -87,7 +88,9 @@ def generate_trees_csv(temp_dir, db_conn):
         logging.info(f"Creating trees.csv file for {len(trees)} trees...")
 
         # Build CSV file with all trees in it
-        header = "id,lat,lng,radolan_sum,age,watering_sum,total_water_sum_liters"
+        header = (
+            "id,lat,lng,radolan_sum,age,watering_sum,total_water_sum_liters,district"
+        )
         lines = []
         for tree in tqdm(trees):
             id = tree[0]
@@ -111,7 +114,9 @@ def generate_trees_csv(temp_dir, db_conn):
             watering_sum = float(tree[5])
             total_water_sum_liters = (radolan_sum / 10.0) + watering_sum
 
-            line = f"{id}, {lat}, {lng}, {radolan_sum}, {age}, {watering_sum}, {total_water_sum_liters}"
+            district = tree[6]
+
+            line = f"{id}, {lat}, {lng}, {radolan_sum}, {age}, {watering_sum}, {total_water_sum_liters}, {district}"
             lines.append(line)
         trees_csv = "\n".join([header] + lines)
         trees_csv_full_path = os.path.join(temp_dir, "trees.csv")
