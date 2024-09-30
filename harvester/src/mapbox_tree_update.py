@@ -72,7 +72,7 @@ def generate_trees_csv(temp_dir, db_conn):
                 WHERE
                     ST_CONTAINS(ST_SetSRID ((SELECT ST_EXTENT (geometry) FROM radolan_geometry), 4326), trees.geom)
                 GROUP BY
-                    trees.id, trees.lat, trees.lng, trees.radolan_sum, trees.pflanzjahr, trees.b    ezirk;
+                    trees.id, trees.lat, trees.lng, trees.radolan_sum, trees.pflanzjahr, trees.bezirk;
             """
         )
         trees = cur.fetchall()
