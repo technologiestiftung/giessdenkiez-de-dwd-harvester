@@ -52,13 +52,13 @@ except:
 
 today = datetime.date.today()
 
-# Calculate the date one year ago
-one_year_ago = today - datetime.timedelta(days=3 * 365)
+# Calculate the date some years ago
+x_years_ago = today - datetime.timedelta(days=3 * 365 + 31)
 
-# Generate a list of all dates between one year ago and today
+# Generate a list of all dates between x years ago and today
 date_list = [
-    one_year_ago + datetime.timedelta(days=x)
-    for x in range((today - one_year_ago).days + 1)
+    x_years_ago + datetime.timedelta(days=x)
+    for x in range((today - x_years_ago).days + 1)
 ]
 
 print(f"📅 Fetching weather data for {len(date_list)} days...")
@@ -66,6 +66,22 @@ weather_days_in_db = []
 with database_connection.cursor() as cur:
     cur.execute("SELECT measure_day, day_finished FROM daily_weather_data;")
     weather_days_in_db = cur.fetchall()
+
+outdated_weather_data = [
+    data_point_in_db
+    for data_point_in_db in weather_days_in_db
+    if data_point_in_db[0].date() < x_years_ago
+]
+logging.info(
+    f"🌦 Deleting {len(outdated_weather_data)} outdated weather data entries..."
+)
+for data_point in outdated_weather_data:
+    with database_connection.cursor() as cur:
+        cur.execute(
+            "DELETE FROM daily_weather_data WHERE measure_day = %s", [data_point[0]]
+        )
+database_connection.commit()
+
 
 for date in date_list:
     today = datetime.date.today()
@@ -75,15 +91,24 @@ for date in date_list:
         for data_point_in_db in weather_days_in_db
         if data_point_in_db[0].date() == date
     ]
+
     if existing_weather_in_db_for_this_day != []:
         logging.info(f"🌦 Weather data for {date} already exists in the database...")
-        if existing_weather_in_db_for_this_day[0][1] == False:
+
+        unfinished_weather_data = [
+            data_point_in_db
+            for data_point_in_db in existing_weather_in_db_for_this_day
+            if data_point_in_db[1] == False
+        ]
+
+        if unfinished_weather_data != []:
             logging.info(
                 f"🌦 Weather data for {date} was not finished in last run, updating now..."
             )
             with database_connection.cursor() as cur:
+                logging.info(f"🌦 Deleting old weather data for {date}...")
                 cur.execute(
-                    "DELETE FROM daily_weather_data WHERE measure_day = %s", [today]
+                    "DELETE FROM daily_weather_data WHERE measure_day = %s", [date]
                 )
             database_connection.commit()
         else:
