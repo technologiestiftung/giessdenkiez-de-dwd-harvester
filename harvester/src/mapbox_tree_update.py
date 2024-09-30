@@ -114,7 +114,9 @@ def generate_trees_csv(temp_dir, db_conn):
             watering_sum = float(tree[5])
             total_water_sum_liters = (radolan_sum / 10.0) + watering_sum
 
-            line = f"{id}, {lat}, {lng}, {radolan_sum}, {age}, {watering_sum}, {total_water_sum_liters}"
+            district = tree[6]
+
+            line = f"{id}, {lat}, {lng}, {radolan_sum}, {age}, {watering_sum}, {total_water_sum_liters}, {district}"
             lines.append(line)
         trees_csv = "\n".join([header] + lines)
         trees_csv_full_path = os.path.join(temp_dir, "trees.csv")
