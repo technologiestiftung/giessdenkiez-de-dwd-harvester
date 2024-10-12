@@ -20,7 +20,7 @@ python-dotenv==0.19.0
 pytz==2019.3
 Shapely==1.7.0
 six==1.14.0
-urllib3==1.25.8
+urllib3==1.26.5
 zope.interface==5.0.1
 requests==2.25.1
 tqdm==4.66.1
