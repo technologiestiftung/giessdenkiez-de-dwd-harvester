@@ -11,44 +11,40 @@
 - Gather precipitation data from DWD's radolan data set, for the region of Berlin and connect to the giessdenkiez.de postgres DB
 - Uploads trees combined with weather data to Mapbox and uses its API to create vector tiles for use on mobile devices
 - Generates CSV and GeoJSON files that contain trees locations and weather data (grid) and uploads them to a Supabase Storage bucket
+- Fetch historical weather data via BrightSky API: https://brightsky.dev/ 
 
-## Pre-Install
+## Development environment
 
-I am using venv to setup a virtual python environment for separating dependencies:
+It is recommended to use Python virtual environments to manage and separate Python dependencies:
 
 ```
 python -m venv REPO_DIRECTORY
 ```
 
-## Install
+## Install dependencies
 
 ```
 pip install -r requirements.txt
 ```
 
-I had some trouble installing psycopg2 on MacOS, there is a problem with the ssl-lib linking. Following install resolved the issue:
+or (if you are on MacOS)
 
+```
+pip install -r requirements-mac.txt
+```
+
+### Dependency troubleshooting
+
+- If installing `psycopg2` on MacOS fails, there nmight be a problem with the ssl-lib linking. Following install resolved the issue:
 ```
 env LDFLAGS='-L/usr/local/lib -L/usr/local/opt/openssl/lib -L/usr/local/opt/readline/lib' pip install psycopg2
 ```
 
-### GDAL
-
-As some of python's gdal bindings are not as good as the command line tool, i had to use the original. Therefore, `gdal` needs to be installed. GDAL is a dependency in requirements.txt, but sometimes this does not work. Then GDAL needs to be installed manually. Afterwards, make sure the command line calls for `gdalwarp` and `gdal_polygonize.py` are working.
-
-#### Linux
-
-Here is a good explanation on how to install gdal on linux: https://mothergeo-py.readthedocs.io/en/latest/development/how-to/gdal-ubuntu-pkg.html
-
-#### Mac
-
-For mac we can use `brew install gdal`.
-
-The current python binding of gdal is fixed to GDAL==2.4.2. If you get another gdal (`ogrinfo --version`), make sure to upgrade to your version: `pip install GDAL==VERSION_FROM_PREVIOUS_COMMAND`
+- The project uses the command line tool of GDAL (because the Python bindings are hard to install without dependency conflicts). The GDAL dependency is not listed in the requirements file and must therefore be installed manually on the system: For Mac, use `brew install gdal`: https://formulae.brew.sh/formula/gdal For Linux, follow https://mothergeo-py.readthedocs.io/en/latest/development/how-to/gdal-ubuntu-pkg.html 
 
 ### Configuration
 
-Copy the `sample.env` file and rename to `.env` then update the parameters, most importantly the database connection parameters.
+Copy the `sample.env` file and rename to `.env` then update all variables:
 
 ```
 PG_SERVER=localhost
@@ -66,6 +62,8 @@ MAPBOXLAYERNAME=your_mapbox_layer_name
 SKIP_MAPBOX=False
 LIMIT_DAYS=30
 SURROUNDING_SHAPE_FILE=./assets/buffer.shp
+WEATHER_HARVEST_LAT=52.520008
+WEATHER_HARVEST_LNG=13.404954
 ```
 
 ## Running
