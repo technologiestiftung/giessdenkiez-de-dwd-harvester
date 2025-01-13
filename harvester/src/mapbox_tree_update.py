@@ -72,15 +72,25 @@ def generate_trees_csv(temp_dir, db_conn):
                     ELSE
                         TRUE
                     END AS is_adopted_by_users,
-                    trees.bezirk as district
+                    trees.bezirk AS district
                 FROM
                     trees
-                LEFT JOIN
-                    trees_watered w ON w.tree_id = trees.id AND w.timestamp >= CURRENT_DATE - INTERVAL '30 days' AND DATE_TRUNC('day', w.timestamp) < CURRENT_DATE
+                    LEFT JOIN trees_watered w ON w.tree_id = trees.id
+                        AND w.timestamp >= CURRENT_DATE - INTERVAL '30 days'
+                        AND DATE_TRUNC('day', w.timestamp) < CURRENT_DATE
+                    LEFT JOIN trees_adopted ad ON ad.tree_id = trees.id
                 WHERE
-                    ST_CONTAINS(ST_SetSRID ((SELECT ST_EXTENT (geometry) FROM radolan_geometry), 4326), trees.geom)
+                    ST_CONTAINS(ST_SetSRID ((
+                            SELECT
+                                ST_EXTENT (geometry)
+                                FROM radolan_geometry), 4326), trees.geom)
                 GROUP BY
-                    trees.id, trees.lat, trees.lng, trees.radolan_sum, trees.pflanzjahr, trees.bezirk;
+                    trees.id,
+                    trees.lat,
+                    trees.lng,
+                    trees.radolan_sum,
+                    trees.pflanzjahr,
+                    trees.bezirk;
             """
         )
         trees = cur.fetchall()
