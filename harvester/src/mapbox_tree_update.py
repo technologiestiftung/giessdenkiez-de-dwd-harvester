@@ -67,6 +67,11 @@ def generate_trees_csv(temp_dir, db_conn):
                     trees.radolan_sum,
                     trees.pflanzjahr,
                     COALESCE(SUM(w.amount), 0) AS watering_sum,
+                    CASE WHEN COUNT(ad.uuid) = 0 THEN
+                        FALSE
+                    ELSE
+                        TRUE
+                    END AS is_adopted_by_users,
                     trees.bezirk as district
                 FROM
                     trees
@@ -91,9 +96,7 @@ def generate_trees_csv(temp_dir, db_conn):
         logging.info(f"Creating trees.csv file for {len(trees)} trees...")
 
         # Build CSV file with all trees in it
-        header = (
-            "id,lat,lng,radolan_sum,age,watering_sum,total_water_sum_liters,district"
-        )
+        header = "id,lat,lng,radolan_sum,age,watering_sum,total_water_sum_liters,is_adopted_by_users,district"
         lines = []
         for tree in tqdm(trees):
             id = tree[0]
@@ -117,9 +120,10 @@ def generate_trees_csv(temp_dir, db_conn):
             watering_sum = float(tree[5])
             total_water_sum_liters = (radolan_sum / 10.0) + watering_sum
 
-            district = tree[6]
+            is_adopted_by_users = tree[6]
+            district = tree[7]
 
-            line = f"{id}, {lat}, {lng}, {radolan_sum}, {age}, {watering_sum}, {total_water_sum_liters}, {district}"
+            line = f"{id}, {lat}, {lng}, {radolan_sum}, {age}, {watering_sum}, {total_water_sum_liters}, {is_adopted_by_users}, {district}"
             lines.append(line)
         trees_csv = "\n".join([header] + lines)
         trees_csv_full_path = os.path.join(temp_dir, "trees.csv")
