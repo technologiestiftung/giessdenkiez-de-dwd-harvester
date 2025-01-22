@@ -53,7 +53,7 @@ def generate_trees_csv(temp_dir, db_conn):
     current_year = datetime.now().year
     with db_conn.cursor() as cur:
 
-        # Set statement timeout to 5 minutes because the following query can take a long time
+        # Set statement timeout to quite long because the following query can take a long time
         cur.execute("SET LOCAL statement_timeout = '10min';")
 
         # Fetch all trees from database
@@ -203,14 +203,20 @@ def update_tree_waterings(trees_watered, db_conn):
     print(f"Set included_in_map_layer = TRUE for {len(trees_watered)} watered trees...")
     tree_ids = [tree_watered[4] for tree_watered in trees_watered]
     with db_conn.cursor() as cur:
+
+        # Set statement timeout to quite long because the following query can take a long time
+        cur.execute("SET LOCAL statement_timeout = '10min';")
+
         # Set included_in_map_layer = FALSE for all waterings
         cur.execute(
             """
                 UPDATE trees_watered SET included_in_map_layer = FALSE WHERE TRUE;
-            """,
-            (tree_ids,),
+            """
         )
         db_conn.commit()
+
+        # Set statement timeout to quite long because the following query can take a long time
+        cur.execute("SET LOCAL statement_timeout = '10min';")
 
         # Set included_in_map_layer = FALSE for the waterings that are included in this round of the harvester
         cur.execute(
