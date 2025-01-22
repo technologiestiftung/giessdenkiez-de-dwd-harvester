@@ -54,7 +54,7 @@ def generate_trees_csv(temp_dir, db_conn):
     with db_conn.cursor() as cur:
 
         # Set statement timeout to 5 minutes because the following query can take a long time
-        cur.execute("SET LOCAL statement_timeout = '5min';")
+        cur.execute("SET LOCAL statement_timeout = '10min';")
 
         # Fetch all trees from database
         cur.execute(
