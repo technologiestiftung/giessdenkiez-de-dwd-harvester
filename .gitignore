@@ -294,7 +294,6 @@ dist
 .pnp.*
 
 # Generated files
-harvester/assets/berlin.shx
 harvester/assets/buffer.cpg
 harvester/assets/buffer.dbf
 harvester/assets/buffer.prj
