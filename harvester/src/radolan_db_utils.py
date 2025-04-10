@@ -82,6 +82,7 @@ def update_trees_in_database(radolan_grid, db_conn):
             processed_count += 1
             if processed_count % 1000 == 0:
                 logging.info(f"  Processed {processed_count}/{total_count} grid cells (Pass 1/2)...")
+                db_conn.commit()  # Commit periodically
         db_conn.commit()
     logging.info(f"Finished Pass 1/2.")
 
@@ -103,6 +104,7 @@ def update_trees_in_database(radolan_grid, db_conn):
             processed_count += 1
             if processed_count % 1000 == 0:
                 logging.info(f"  Processed {processed_count}/{total_count} grid cells (Pass 2/2)...")
+                db_conn.commit()  # Commit periodically
         db_conn.commit()
     logging.info(f"Finished Pass 2/2.")
 
