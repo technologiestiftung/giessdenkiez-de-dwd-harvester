@@ -31,6 +31,7 @@ env:
   SKIP_MAPBOX: "True"
   WEATHER_HARVEST_LAT: "52.520008"
   WEATHER_HARVEST_LNG: "13.404954"
+  SURROUNDING_SHAPE_FILE: "/app/assets/buffer.shp"
 
 jobs:
   test-harvest:
