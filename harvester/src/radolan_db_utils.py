@@ -65,48 +65,84 @@ def update_trees_in_database(radolan_grid, db_conn):
         radolan_grid (_type_): the radolon value grid to use for updating the trees
         db_conn (_type_): the database connection
     """
-    logging.info(f"Updating trees in database (Pass 1/2)...")
-    processed_count = 0
-    total_count = len(radolan_grid)  # Assuming radolan_grid is a list or has len()
-    with db_conn.cursor() as cur:
-        # Replace execute_batch with a loop
-        for days, total_sum, geojson_str in radolan_grid:
-            cur.execute(
-                """
-                UPDATE trees
-                SET radolan_days = %s, radolan_sum = %s
-                WHERE ST_CoveredBy(geom, ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326));
-                """,
-                (days, total_sum, geojson_str),
-            )
-            processed_count += 1
-            if processed_count % 1000 == 0:
-                logging.info(f"  Processed {processed_count}/{total_count} grid cells (Pass 1/2)...")
-                db_conn.commit()  # Commit periodically
-        db_conn.commit()
-    logging.info(f"Finished Pass 1/2.")
+    triggers_to_manage = [
+        "tg_refresh_trees_count_mv",
+        "tg_refresh_most_frequent_tree_species_mv",
+        "tg_refresh_total_tree_species_count_mv",
+    ]
+    views_to_refresh = [
+        "trees_count",
+        "most_frequent_tree_species",
+        "total_tree_species_count",
+    ]
 
-
-    logging.info(f"Updating trees with NULL radolan_sum within buffer (Pass 2/2)...")
-    processed_count = 0
-    # Also replace the second execute_batch
     with db_conn.cursor() as cur:
-        for days, total_sum, geojson_str in radolan_grid:
-            cur.execute(
-                """
-                UPDATE trees
-                SET radolan_days = %s, radolan_sum = %s
-                WHERE trees.radolan_sum IS NULL
-                AND ST_CoveredBy(geom, ST_Buffer(ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326), 0.0002));
-                """,
-                (days, total_sum, geojson_str),
-            )
-            processed_count += 1
-            if processed_count % 1000 == 0:
-                logging.info(f"  Processed {processed_count}/{total_count} grid cells (Pass 2/2)...")
-                db_conn.commit()  # Commit periodically
-        db_conn.commit()
-    logging.info(f"Finished Pass 2/2.")
+        try:
+            # Disable triggers
+            logging.info(f"Disabling triggers: {', '.join(triggers_to_manage)}")
+            for trigger in triggers_to_manage:
+                cur.execute(f"ALTER TABLE trees DISABLE TRIGGER {trigger};")
+            db_conn.commit()
+
+            # --- Start Pass 1 --- #
+            logging.info(f"Updating trees in database (Pass 1/2)...")
+            processed_count = 0
+            total_count = len(radolan_grid)  # Assuming radolan_grid is a list or has len()
+            for days, total_sum, geojson_str in radolan_grid:
+                cur.execute(
+                    """
+                    UPDATE trees
+                    SET radolan_days = %s, radolan_sum = %s
+                    WHERE ST_CoveredBy(geom, ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326));
+                    """,
+                    (days, total_sum, geojson_str),
+                )
+                processed_count += 1
+                if processed_count % 1000 == 0:
+                    logging.info(f"  Processed {processed_count}/{total_count} grid cells (Pass 1/2)...")
+                    db_conn.commit()  # Commit periodically
+            db_conn.commit()
+            logging.info(f"Finished Pass 1/2.")
+            # --- End Pass 1 --- #
+
+            # --- Start Pass 2 --- #
+            logging.info(f"Updating trees with NULL radolan_sum within buffer (Pass 2/2)...")
+            processed_count = 0
+            # Also replace the second execute_batch
+            for days, total_sum, geojson_str in radolan_grid:
+                cur.execute(
+                    """
+                    UPDATE trees
+                    SET radolan_days = %s, radolan_sum = %s
+                    WHERE trees.radolan_sum IS NULL
+                    AND ST_CoveredBy(geom, ST_Buffer(ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326), 0.0002));
+                    """,
+                    (days, total_sum, geojson_str),
+                )
+                processed_count += 1
+                if processed_count % 1000 == 0:
+                    logging.info(f"  Processed {processed_count}/{total_count} grid cells (Pass 2/2)...")
+                    db_conn.commit()  # Commit periodically
+            db_conn.commit()
+            logging.info(f"Finished Pass 2/2.")
+            # --- End Pass 2 --- #
+
+        finally:
+            # Re-enable triggers regardless of success/failure
+            logging.info(f"Re-enabling triggers: {', '.join(triggers_to_manage)}")
+            for trigger in triggers_to_manage:
+                cur.execute(f"ALTER TABLE trees ENABLE TRIGGER {trigger};")
+            db_conn.commit()
+
+        # Refresh materialized views
+        logging.info(f"Refreshing materialized views: {', '.join(views_to_refresh)}")
+        for view in views_to_refresh:
+            try:
+                cur.execute(f"REFRESH MATERIALIZED VIEW CONCURRENTLY {view};")
+                db_conn.commit()
+            except Exception as e:
+                logging.error(f"Error refreshing materialized view {view}: {e}")
+                db_conn.rollback() # Rollback the failed refresh transaction
 
 
 def cleanup_radolan_entries(limit_days, db_conn):
