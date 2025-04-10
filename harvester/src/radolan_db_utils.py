@@ -67,28 +67,30 @@ def update_trees_in_database(radolan_grid, db_conn):
     """
     logging.info(f"Updating trees in database...")
     with db_conn.cursor() as cur:
-        psycopg2.extras.execute_batch(
-            cur,
-            """
-            UPDATE trees
-            SET radolan_days = %s, radolan_sum = %s
-            WHERE ST_CoveredBy(geom, ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326));
-            """,
-            radolan_grid,
-        )
+        # Replace execute_batch with a loop
+        for days, total_sum, geojson_str in radolan_grid:
+            cur.execute(
+                """
+                UPDATE trees
+                SET radolan_days = %s, radolan_sum = %s
+                WHERE ST_CoveredBy(geom, ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326));
+                """,
+                (days, total_sum, geojson_str),
+            )
         db_conn.commit()
 
+    # Also replace the second execute_batch
     with db_conn.cursor() as cur:
-        psycopg2.extras.execute_batch(
-            cur,
-            """
-            UPDATE trees
-            SET radolan_days = %s, radolan_sum = %s
-            WHERE trees.radolan_sum IS NULL
-            AND ST_CoveredBy(geom, ST_Buffer(ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326), 0.0002));
-            """,
-            radolan_grid,
-        )
+        for days, total_sum, geojson_str in radolan_grid:
+            cur.execute(
+                """
+                UPDATE trees
+                SET radolan_days = %s, radolan_sum = %s
+                WHERE trees.radolan_sum IS NULL
+                AND ST_CoveredBy(geom, ST_Buffer(ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326), 0.0002));
+                """,
+                (days, total_sum, geojson_str),
+            )
         db_conn.commit()
 
 
