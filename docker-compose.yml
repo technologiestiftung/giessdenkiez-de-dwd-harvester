@@ -5,20 +5,25 @@ services:
     build:
       context: ./harvester
       dockerfile: Dockerfile
-    depends_on:
-      - postgres
     volumes:
       - ./harvester:/app
-    env_file: ./harvester/.env
     environment:
-      # PG_DB: trees
-      # PG_SERVER: postgres
-      # PG_PORT: 5432
-      # PG_USER: fangorn
-      # PG_PASS: ent
-      # SUPABASE_PROJECT_ID=
-      # SUPABASE_SERVICE_ROLE_KEY=
-      # SUPABASE_BUCKET_NAME=data_assets
+      PG_DB: postgres # Default Supabase DB
+      PG_SERVER: host.docker.internal # Connect to host machine
+      PG_PORT: 5432 # Default Supabase port
+      PG_USER: postgres # Default Supabase user
+      PG_PASS: postgres # Default Supabase password (change if you set a different one)
+      SUPABASE_URL: http://host.docker.internal:54321 # Use host.docker.internal
+      SUPABASE_SERVICE_ROLE_KEY: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZS1kZW1vIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImV4cCI6MTk4MzgxMjk5Nn0.EGIM96RAZx35lJzdJsyH-qQwv8Hdp7fsn3W0YpN81IU
+      SUPABASE_BUCKET_NAME: data_assets # Or your actual bucket name
+
+      # Variables from sample.env
+      SKIP_MAPBOX: "True" # Keep Mapbox disabled for local dev
+      LIMIT_DAYS: "30"
+      SURROUNDING_SHAPE_FILE: "./assets/buffer.shp"
+      WEATHER_HARVEST_LAT: "52.520008"
+      WEATHER_HARVEST_LNG: "13.404954"
+
       # bygiessdenkiez-devoverwriting these here we make sure
       # we dont push all the time to mapbox 💵
       MAPBOXUSERNAME: "123"
@@ -31,17 +36,4 @@ services:
     # By overtwriting the command we can start the container
     # move into it (docker exec -it {CONTAINER ID} /bin/sh
     # and execute or debug all the scripts manually
-    command: [ "tail", "-f", "/dev/null" ]
-
-  postgres:
-    container_name: "postgres"
-    image: "dwd-postgres"
-    build:
-      context: ./dev-db
-      dockerfile: Dockerfile
-    environment:
-      POSTGRES_USER: fangorn
-      POSTGRES_DB: trees
-      POSTGRES_PASSWORD: ent
-    ports:
-      - "5432:5432"
+    command: ["tail", "-f", "/dev/null"]
