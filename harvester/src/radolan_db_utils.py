@@ -65,7 +65,9 @@ def update_trees_in_database(radolan_grid, db_conn):
         radolan_grid (_type_): the radolon value grid to use for updating the trees
         db_conn (_type_): the database connection
     """
-    logging.info(f"Updating trees in database...")
+    logging.info(f"Updating trees in database (Pass 1/2)...")
+    processed_count = 0
+    total_count = len(radolan_grid)  # Assuming radolan_grid is a list or has len()
     with db_conn.cursor() as cur:
         # Replace execute_batch with a loop
         for days, total_sum, geojson_str in radolan_grid:
@@ -77,8 +79,15 @@ def update_trees_in_database(radolan_grid, db_conn):
                 """,
                 (days, total_sum, geojson_str),
             )
+            processed_count += 1
+            if processed_count % 1000 == 0:
+                logging.info(f"  Processed {processed_count}/{total_count} grid cells (Pass 1/2)...")
         db_conn.commit()
+    logging.info(f"Finished Pass 1/2.")
 
+
+    logging.info(f"Updating trees with NULL radolan_sum within buffer (Pass 2/2)...")
+    processed_count = 0
     # Also replace the second execute_batch
     with db_conn.cursor() as cur:
         for days, total_sum, geojson_str in radolan_grid:
@@ -91,7 +100,11 @@ def update_trees_in_database(radolan_grid, db_conn):
                 """,
                 (days, total_sum, geojson_str),
             )
+            processed_count += 1
+            if processed_count % 1000 == 0:
+                logging.info(f"  Processed {processed_count}/{total_count} grid cells (Pass 2/2)...")
         db_conn.commit()
+    logging.info(f"Finished Pass 2/2.")
 
 
 def cleanup_radolan_entries(limit_days, db_conn):
