@@ -98,7 +98,7 @@ def update_trees_in_database(radolan_grid, db_conn):
                     (days, total_sum, geojson_str),
                 )
                 processed_count += 1
-                if processed_count % 1000 == 0:
+                if processed_count % 10 == 0:
                     logging.info(f"  Processed {processed_count}/{total_count} grid cells (Pass 1/2)...")
                     db_conn.commit()  # Commit periodically
             db_conn.commit()
@@ -120,7 +120,7 @@ def update_trees_in_database(radolan_grid, db_conn):
                     (days, total_sum, geojson_str),
                 )
                 processed_count += 1
-                if processed_count % 1000 == 0:
+                if processed_count % 10 == 0:
                     logging.info(f"  Processed {processed_count}/{total_count} grid cells (Pass 2/2)...")
                     db_conn.commit()  # Commit periodically
             db_conn.commit()
