@@ -30,7 +30,7 @@ def download_radolan_data(start_date, end_date, path):
         try:
             urllib.request.urlretrieve(download_url, dest_file)
             downloaded_files.append(dest_file)
-            logging.info(f"Downloading {download_url}
+            logging.info(f"Downloading {download_url}")
         except Exception as e:
             logging.info(f"Skipping download {download_url}: {e}")
         finally:
