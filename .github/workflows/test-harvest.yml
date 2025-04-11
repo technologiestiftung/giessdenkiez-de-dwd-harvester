@@ -62,8 +62,8 @@ jobs:
           version: 2.20.12
       - name: build the harvester
         run: |
-          cd harvester && docker build \\
-            --build-arg SURROUNDING_SHAPE_FILE='${{ env.SURROUNDING_SHAPE_FILE }}' \\
+          cd harvester && docker build \
+            --build-arg SURROUNDING_SHAPE_FILE='${{ env.SURROUNDING_SHAPE_FILE }}' \
             --tag technologiestiftung/giessdenkiez-de-dwd-harvester:test .
       - name: Start the api
         id: api-start
