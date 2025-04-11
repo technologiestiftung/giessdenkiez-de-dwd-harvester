@@ -3,6 +3,10 @@ import json
 import time
 import boto3
 import logging
+import psycopg2
+from datetime import datetime
+from datetime import timedelta
+import pytz
 
 
 def upload_to_mapbox_storage(path_to_file, mapbox_username, mapbox_token):
@@ -120,3 +124,60 @@ def wait_for_tileset_creation_complete(
         time.sleep(2)
 
     return error
+
+
+def update_trees_in_database(radolan_grid, db_conn):
+    """Updates tree radolon data in database
+
+    Args:
+        radolan_grid (_type_): the radolon value grid to use for updating the trees
+        db_conn (_type_): the database connection
+    """
+    logging.info(f"Updating trees in database...")
+
+    # First update block: Process iteratively
+    updated_count1 = 0
+    try:
+        with db_conn.cursor() as cur:
+            sql = """
+                UPDATE trees
+                SET radolan_days = %s, radolan_sum = %s
+                WHERE ST_CoveredBy(geom, ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326));
+            """
+            for item in radolan_grid:
+                try:
+                    cur.execute(sql, item)
+                    updated_count1 += cur.rowcount
+                except Exception as e:
+                    logging.error(f"Error updating item {item}: {e}")
+                    # Optionally rollback or decide how to handle partial failures
+                    # db_conn.rollback() might be too coarse here.
+            db_conn.commit() # Commit after processing all items in the first loop
+            logging.info(f"First update block affected {updated_count1} rows.")
+    except Exception as e:
+        logging.error(f"Error during first update block: {e}")
+        db_conn.rollback() # Rollback if the loop itself fails badly
+        raise # Re-raise the exception
+
+    # Second update block: Process iteratively (similar change needed)
+    updated_count2 = 0
+    try:
+        with db_conn.cursor() as cur:
+             sql_buffer = """
+                 UPDATE trees
+                 SET radolan_days = %s, radolan_sum = %s
+                 WHERE trees.radolan_sum IS NULL
+                 AND ST_CoveredBy(geom, ST_Buffer(ST_SetSRID(ST_GeomFromGeoJSON(%s), 4326), 0.0002));
+             """
+             for item in radolan_grid:
+                 try:
+                     cur.execute(sql_buffer, item)
+                     updated_count2 += cur.rowcount
+                 except Exception as e:
+                     logging.error(f"Error updating buffered item {item}: {e}")
+             db_conn.commit() # Commit after processing all items in the second loop
+             logging.info(f"Second update block affected {updated_count2} rows.")
+    except Exception as e:
+        logging.error(f"Error during second update block: {e}")
+        db_conn.rollback()
+        raise
