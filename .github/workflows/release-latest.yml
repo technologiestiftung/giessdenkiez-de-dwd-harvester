@@ -4,6 +4,7 @@ env:
   DOCKER_USERNAME: ${{ secrets.DOCKER_USERNAME }}
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   HARVESTER_FOLDER: harvester/
+  SURROUNDING_SHAPE_FILE: "/app/assets/berlin.shp"
 
 on:
   workflow_dispatch:
@@ -27,5 +28,7 @@ jobs:
         run: |
           cd $HARVESTER_FOLDER
           echo "$DOCKER_PASSWORD" |  docker login -u "$DOCKER_USERNAME" --password-stdin
-          docker build --tag "${GITHUB_REPOSITORY}:latest" .
+          docker build \
+          --build-arg SURROUNDING_SHAPE_FILE='${{ env.SURROUNDING_SHAPE_FILE }}' \
+          --tag "${GITHUB_REPOSITORY}:latest" .
           docker push "${GITHUB_REPOSITORY}:latest"
